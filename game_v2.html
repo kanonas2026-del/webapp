@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ウクレレ・キッズ - ソロもひけるよ！</title>
+  <style>
+
+:root{
+  --vvTop: 0px;
+  --vvLeft: 0px;
+
+  --bgTop: rgba(168,230,207,0.45);
+  --bgMid: rgba(122,177,204,0.22);
+  --bgBottom: rgba(255,255,255,0.92);
+  --text: #4a3728;
+  --card: rgba(255,255,255,0.92);
+  --shadow: rgba(0,0,0,0.18);
+  --primary: #ff7a3d;
+  --mint: #a8e6cf;
+  --sky: #7ab1cc;
+  --aqua: #5ce1e6;
+  --markSize: clamp(54px, 10vw, 66px);
+}
+
+body{
+  margin:0;
+    background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  overflow:hidden;
+  }
+canvas{ display:block; width:100%; height:100%; touch-action:none; }
+
+#menu-overlay{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.32);
+  display:flex; align-items:flex-start; justify-content:center;
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  padding: max(12px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom));
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+.menu-card{
+  background: var(--card);
+  max-height: calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  color: var(--text);
+  width: min(560px, 96vw);
+  margin: 0 auto;
+  border-radius: 18px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 12px 0 rgba(122,177,204,0.35), 0 18px 36px var(--shadow);
+  border: 2px solid rgba(255,255,255,0.65);
+}
+.menu-card h1{
+  margin: 0 0 10px;
+  font-size: 26px;
+  letter-spacing: 0.3px;
+}
+.menu-card .sub{
+  margin: 0 0 14px;
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+.menu-list{ display:flex; flex-direction:column; gap:10px; margin-top: 6px; }
+.menu-btn{
+  appearance:none; border: none;
+  background: rgba(255,255,255,0.98);
+  color: var(--text);
+  width: 100%;
+  border-radius: 16px;
+  padding: 12px 12px;
+  cursor: pointer;
+  display:flex; gap: 12px; align-items:flex-start;
+  box-shadow: 0 6px 0 rgba(122,177,204,0.32);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.menu-btn:active{ transform: translateY(3px); box-shadow: none; }
+.badge{
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border-radius: 12px;
+  background: var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.14);
+}
+.menu-btn.mode2 .badge{ background: #ffde59; color:#4a3728; }
+.menu-btn.mode3 .badge{ background: #7ed957; }
+.menu-btn.mode4 .badge{ background: var(--aqua); color: #133; }
+.menu-btn .title{ font-size: 18px; font-weight: 900; line-height: 1.2; }
+.menu-btn small{ display:block; font-size: 13px; font-weight: 650; opacity: 0.86; margin-top: 4px; line-height: 1.35; }
+.menu-btn .menu-text{ flex:1 1 auto; text-align:left; }
+.badge{ font-size: 20px; }
+
+
+#lyrics-area{
+  position:absolute; top: calc(10px + env(safe-area-inset-top) + var(--vvTop)); left: 50%; transform: translateX(-50%);
+  width: min(720px, 92vw);
+  text-align:center;
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--text);
+  text-shadow: 0 3px 10px rgba(255,255,255,0.75);
+  pointer-events:none;
+  z-index: 5;
+}
+#score-panel{
+  position:fixed; top: calc(12px + env(safe-area-inset-top) + var(--vvTop)); left: calc(12px + env(safe-area-inset-left) + var(--vvLeft));
+  font-size: 22px; font-weight: 900;
+  z-index: 90; display:none;
+  background: rgba(255,255,255,0.85);
+  padding: 8px 10px;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+#timer-panel{
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top) + var(--vvTop));
+  right: calc(12px + env(safe-area-inset-right));
+  z-index: 90;
+  display: none;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  font-weight: 900;
+  font-size: 16px;
+}
+
+#stopBtn{
+  position: fixed;
+  right: calc(14px + env(safe-area-inset-right));
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 180;
+  display: none;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.92);
+  color: var(--text);
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+#stopBtn:active{ transform: translateY(2px); box-shadow: 0 6px 14px rgba(0,0,0,0.10); }
+
+/* Pause / Result overlays */
+#pause-overlay, #result-overlay{
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+  pointer-events: auto;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.78), rgba(255,122,61,0.18) 45%, rgba(168,230,207,0.34) 78%, rgba(122,177,204,0.26));
+  backdrop-filter: blur(3px);
+}
+
+#pause-overlay{
+  background: rgba(0,0,0,0.38);
+}
+.pause-card{
+  width: min(520px, calc(100vw - 28px));
+  border-radius: 22px;
+  padding: 18px 18px 16px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+  text-align: center;
+}
+.pause-title{
+  font-weight: 1000;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+.pause-sub{
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+.pause-menu{
+  border: none;
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.08);
+  font-weight: 900;
+  cursor: pointer;
+}
+#result-overlay{
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.35), rgba(0,0,0,0.45));
+}
+.result-card{
+  width: min(560px, calc(100vw - 28px));
+  border-radius: 26px;
+  padding: 18px 18px 16px;
+  background: rgba(255,255,255,1.0);
+  box-shadow: 0 22px 48px rgba(0,0,0,0.28);
+  border: 6px solid rgba(255,255,255,0.95);
+  outline: 3px solid rgba(255,122,61,0.22);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.result-card:before{
+  content:"";
+  position:absolute; inset:-40px;
+  background: conic-gradient(from 90deg, rgba(255,122,61,0.35), rgba(92,225,230,0.35), rgba(126,217,87,0.35), rgba(255,222,89,0.35), rgba(255,122,61,0.35));
+  filter: blur(18px);
+  opacity: 0.9;
+  z-index: 0;
+}
+.result-card > *{ position: relative; z-index: 1; }
+.result-title{
+  font-weight: 1000;
+  font-size: 54px;
+  background: linear-gradient(90deg, #ff7a3d, #ff5757, #7ed957, #5ce1e6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+
+  letter-spacing: 1px;
+  text-shadow: 0 6px 0 rgba(255,255,255,0.65);
+  animation: popTitle 0.9s ease-out both;
+}
+.result-sub{
+  font-weight: 1000;
+  font-size: 20px;
+  margin-top: 4px;
+  margin-bottom: 10px;
+  animation: popTitle 1.0s ease-out both;
+}
+.result-score{
+  font-weight: 1000;
+  font-size: 34px;
+  margin: 10px 0 6px;
+}
+.result-msg{
+  font-weight: 900;
+  font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 14px;
+}
+.result-actions{
+  display:flex;
+  gap: 10px;
+  justify-content: center;
+}
+.result-btn{
+  border:none;
+  border-radius: 18px;
+  padding: 12px 16px;
+  font-weight: 1000;
+  cursor: pointer;
+  background: rgba(0,0,0,0.08);
+}
+.result-btn.primary{
+  background: rgba(255,122,61,0.95);
+  color: #fff;
+}
+@keyframes popTitle{
+  0%{ transform: translateY(10px) scale(0.9); opacity: 0; }
+  100%{ transform: translateY(0) scale(1); opacity: 1; }
+}
+
+
+.pause-resume{
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255,122,61,0.95);
+  color: #fff;
+  font-weight: 1000;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+  margin-bottom: 10px;
+}
+.pause-resume:active{ transform: translateY(1px) scale(0.99); }
+
+
+
+  /* ===== モードせれくと ===== */
+  .mode-select{
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  .mode-select-title{
+    font-weight: 900;
+    color: rgba(0,0,0,0.55);
+    font-size: 13px;
+    letter-spacing: .5px;
+    margin: 0 0 8px;
+  }
+  .mode-pills{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .mode-pill{
+    border: 2px solid rgba(0,0,0,0.12);
+    background: rgba(255,255,255,0.85);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-weight: 900;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.10);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-pill:active{ transform: translateY(2px); box-shadow: 0 4px 0 rgba(0,0,0,0.10); }
+  .mode-pill.active{
+    border-color: rgba(255,122,61,0.60);
+    background: rgba(255,122,61,0.12);
+  }
+
+
+
+@media (max-height: 420px){
+  .menu-card{ padding: 14px 14px 10px; border-radius: 16px; }
+  .menu-card h1{ font-size: 22px; margin: 0 0 8px; }
+  .menu-card .sub{ margin: 0 0 10px; font-size: 12px; }
+  .menu-list{ gap: 8px; }
+  .menu-btn{ padding: 10px 12px; }
+}
+
+
+#back-btn{
+  position:fixed;
+  top: calc(10px + env(safe-area-inset-top) + var(--vvTop));
+  left: calc(10px + env(safe-area-inset-left) + var(--vvLeft));
+  z-index: 120;
+  display:none;
+}
+#back-btn a{
+  display:inline-block;
+  text-decoration:none;
+  color: #0d2b3b;
+  font-weight: 900;
+  background: rgba(255,255,255,0.82);
+  padding: 10px 12px;
+  border-radius: 16px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+#chordHud{
+  position:fixed;
+  top: calc(58px + env(safe-area-inset-top) + var(--vvTop));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 125;
+  display:none;
+  pointer-events:none;
+  background: rgba(255,255,255,0.86);
+  border-radius: 18px;
+  padding: 8px 14px;
+  font-weight: 900;
+  font-size: clamp(22px, 4.2vw, 40px);
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+}
+</style>
+</head>
+<body>
+
+  <div id="menu-overlay">
+  <div class="menu-card">
+    <h1>🎸 タップでれんしゅう</h1>
+    <p class="sub">まずはタップ式で完成を目指します。<br>メニューをえらんでスタート！</p>
+
+    <div class="menu-list">
+      <button class="menu-btn mode1" onclick="startScale()">
+        <div class="badge">🐤</div>
+        <div class="menu-text">
+          <div class="title">ドレミファソラシド</div>
+          <small>くり返して、だんだん速くなる（反復れんしゅう）</small>
+        </div>
+      </button>
+
+      <button class="menu-btn mode2" onclick="startChordsEasy()">
+        <div class="badge">🐱</div>
+        <div class="menu-text">
+          <div class="title">コード かんたん</div>
+          <small>C / F / G7 / Am を くり返す</small>
+        </div>
+      </button>
+
+      <button class="menu-btn mode3" onclick="startChordsHard()">
+        <div class="badge">🐼</div>
+        <div class="menu-text">
+          <div class="title">コード ちょいむず</div>
+          <small>C / F / G7 / Am ＋ よく使うコードも れんしゅう</small>
+        </div>
+      </button>
+
+      <button class="menu-btn mode4" onclick="startSongTwinkle()">
+        <div class="badge">🦁</div>
+        <div class="menu-text">
+          <div class="title">実さいの曲</div>
+          <small>きらきら星（ソロ＆コード）</small>
+        </div>
+      </button>
+    </div>
+
+    <div class="mode-select">
+      <div class="mode-select-title">モードせれくと</div>
+      <div class="mode-pills">
+        <button class="mode-pill" type="button" data-mode="NORMAL">ノーマル（ミスしても進む）</button>
+        <button class="mode-pill active" type="button" data-mode="WAIT">まちモード（ミスしたら止まる　練習用）</button>
+        <button class="mode-pill" type="button" data-mode="TEST">TESTモード（タップでHIT）</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <div id="lyrics-area"></div>
+  <div class="nav-back" id="back-btn"><a href="#" onclick="location.reload()">🏝️ メニュー</a></div>
+  <div id="score-panel">⭐ <span id="score">0</span></div>
+  <div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
+  <div id="chordHud" aria-hidden="true"></div>
+  <button id="stopBtn" type="button">ストップ</button>
+  <div id="pause-overlay" aria-hidden="true">
+    <div class="pause-card">
+      <div class="pause-title">ストップ中</div>
+      <div class="pause-sub">「つづける」で、つづきから再開できるよ。</div>
+      <button class="pause-resume" type="button" onclick="resumeGame()">つづける</button>
+      <button class="pause-menu" type="button" onclick="goMenuFromPause()">メニューにもどる</button>
+    </div>
+  </div>
+
+  <div id="result-overlay" aria-hidden="true">
+    <div class="result-card">
+      <div class="result-title" id="result-title">そこまで！</div>
+      <div class="result-sub">結果発表！！</div>
+      <div class="result-score">⭐ <span id="result-score">0</span> てん</div>
+      <div class="result-msg" id="result-msg">またあそぼう！</div>
+      <div class="result-actions">
+        <button class="result-btn primary" type="button" onclick="restartLast()">もう一度</button>
+        <button class="result-btn" type="button" onclick="goMenu()">メニュー</button>
+      </div>
+    </div>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const lyricsEl = document.getElementById('lyrics-area');
+const timerPanel = document.getElementById('timer-panel');
+const timerEl = document.getElementById('timer');
+const chordHUDEl = document.getElementById('chordHud');
+const stopBtnEl = document.getElementById('stopBtn');
+
+let gameState = 'MENU';
+
+// ===== Mode select =====
+let playModeSelected = 'WAIT';   // メニューで選ぶ（既定：今の動きに合わせてTEST）
+let playModeActive   = 'TEST';   // 実プレイ中のモード（start時に確定）
+
+// まちモード（ミスしたら止まる）
+let waitHold = false;
+let waitHoldPrevSpeed = 0;
+let waitTargetGroup = null; // まちモードで“今合わせるべき”グループ
+
+// タイマー停止用
+let lastFrameT = 0;
+
+function setPlayMode(mode){
+  playModeSelected = mode;
+  document.querySelectorAll('.mode-pill').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+}
+
+let rafId = 0;
+let gameEndAt = 0;
+const GAME_DURATION_MS = 60 * 1000; // 60秒でおわり
+
+let score = 0; let combo = 0; let groups = []; let pops = [];
+let flashes = [];
+let toasts = []; let stars = [];
+let lastSpawn = 0; let titleOpacity = 2.0;
+const NUT_X = 180;
+
+const STRING_LABELS = ['1A','2E','3C','4G'];
+const STRING_COLORS = ['#ff5757', '#ffde59', '#7ed957', '#5ce1e6'];
+const MARK_CX = 125; // チューニング画面と同じ位置
+const MARK_R = 24;   // チューニング画面と同じ半径
+// サポート表示（ガイド）
+const SUPPORT_AHEAD = 620;   // どれくらい手前からサポートを出すか
+const SUPPORT_PAST  = 220;   // ナットを過ぎても少しだけ残す
+const HIT_WINDOW = 110;      // タップ判定の幅
+const PERFECT_WINDOW = 50;   // さらに良い判定
+const AUTO_SPEED = true;     // 5れんぞくごとに加速 / ミスで少し減速
+const SPEEDUP_MULT = 1.2;    // 5れんぞくごとに 1.2ばい
+const MAX_SPEED = 10.0;
+const MIN_SPEED = 2.6;
+let fretWidth = 0;
+let baseScrollSpeed = 3.5;
+let scrollSpeed = baseScrollSpeed;
+let currentLevelChords = [];
+let gameMode = 'practice'; // 'practice' | 'scale' | 'song'
+let practiceOrder = 'cycle';
+let practiceIndex = 0;
+let scaleSeq = ['do','re','mi','fa','so','la','si','do2'];
+let scaleIndex = 0;
+let spawnInterval = 1800;
+let spawnMinInterval = 900;
+let spawnStep = 120;
+let startBannerText = '';
+
+// 和音（コード）ライブラリ
+const CHORD_LIB = {
+  'C':  { name: 'C',  targetIdx: 0, fingers: [{s: 1, f: 3, txt: '薬'}] },
+  'F':  { name: 'F',  targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}, {s: 4, f: 2, txt: '中'}] },
+  'G7': { name: 'G7', targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}, {s: 1, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}] },
+
+  // 追加：よく使うコード
+  'Am': { name: 'Am', targetIdx: 0, fingers: [{s: 3, f: 2, txt: '中'}] },
+  'G':  { name: 'G',  targetIdx: 0, fingers: [{s: 3, f: 2, txt: '人'}, {s: 2, f: 3, txt: '薬'}, {s: 1, f: 2, txt: '中'}] },
+  'A7': { name: 'A7', targetIdx: 0, fingers: [{s: 3, f: 1, txt: '人'}] },
+  'Dm': { name: 'Dm', targetIdx: 0, fingers: [{s: 4, f: 2, txt: '中'}, {s: 3, f: 1, txt: '人'}, {s: 2, f: 1, txt: '人'}] },
+  'Em': { name: 'Em', targetIdx: 0, fingers: [{s: 3, f: 4, txt: '小'}, {s: 2, f: 3, txt: '薬'}, {s: 1, f: 2, txt: '中'}] },
+  'D7': { name: 'D7', targetIdx: 0, fingers: [{s: 2, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}, {s: 4, f: 2, txt: '人'}] }
+};
+
+// ソロメロディ（単音）ライブラリ：楽譜の数字を再現
+const SOLO_LIB = {
+  'do':  { name: '', targetIdx: 0, fingers: [{s: 3, f: 0, txt: '0'}] },
+  're':  { name: '', targetIdx: 0, fingers: [{s: 3, f: 2, txt: '中'}] },
+  'mi':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 0, txt: '0'}] },
+  'fa':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}] },
+  'so':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 3, txt: '薬'}] },
+  'la':  { name: '', targetIdx: 0, fingers: [{s: 1, f: 0, txt: '0'}] },
+  'si':  { name: '', targetIdx: 0, fingers: [{s: 1, f: 2, txt: '中'}] },
+  'do2': { name: '', targetIdx: 0, fingers: [{s: 1, f: 3, txt: '薬'}] }
+};
+
+// IMG_6639.JPG を忠実に再現（伴奏コードとソロメロディを交互に配置）
+const SONG_DATA = [
+  { lib: CHORD_LIB, key: 'C', lyrics: "きら" }, { lib: SOLO_LIB, key: 'do', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "きら" }, { lib: SOLO_LIB, key: 'so', lyrics: "" },
+  { lib: CHORD_LIB, key: 'F', lyrics: "ひか" }, { lib: SOLO_LIB, key: 'la', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "るー" }, { lib: SOLO_LIB, key: 'so', lyrics: "" },
+  { lib: CHORD_LIB, key: 'G7', lyrics: "おそ" }, { lib: SOLO_LIB, key: 'fa', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "らの" }, { lib: SOLO_LIB, key: 'mi', lyrics: "" },
+  { lib: CHORD_LIB, key: 'G7', lyrics: "ほし" }, { lib: SOLO_LIB, key: 're', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "よー" }, { lib: SOLO_LIB, key: 'do', lyrics: "" }
+];
+
+let songIndex = 0;
+let isSongMode = false;
+let audioCtx = null;
+
+stopBtnEl.addEventListener('click', () => {
+  if (gameState === 'PLAY') pauseGame();
+  // PAUSE中は中央の「つづける」で再開する
+  });
+
+
+
+// モードせれくと（メニュー）
+document.querySelectorAll('.mode-pill').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    setPlayMode(btn.dataset.mode || 'TEST');
+  }, { passive:false });
+});
+// 既定値を反映
+setPlayMode(playModeSelected);
+
+function startScale(){
+  // だんだん速くなる：最初はゆっくり → 最後はちょっと早め
+  initGame('scale', null, {speedBase: 3.4,  interval: 2000, minInterval: 900, step: 120, playMode: playModeSelected});
+}
+function startChordsEasy(){
+  initGame('practice', ['C','F','G7','Am'], { speedBase: 3.2,  order: 'cycle' });
+}
+function startChordsHard(){
+  // ちょいむず：よく使うコードも追加（必要ならここに増やしてOK）
+  initGame('practice', ['C','F','G7','Am','G','A7','Dm','Em','D7'], { speedBase: 3.35,  order: 'cycle' });
+}
+function startSongTwinkle(){
+  initGame('song', 'きらきら星', {speedBase: 3.45, playMode: playModeSelected});
+}
+
+function initGame(mode, levelData, options = {}) {
+  gameState = 'PLAY';
+  // モード確定（start時に固定）
+  playModeActive = (options && options.playMode) ? options.playMode : playModeSelected;
+  waitHold = false;
+  waitTargetGroup = null;
+  lastFrameT = 0;
+
+  // 前回設定を保存（結果画面の「もう一度」で使う）
+  lastStart = { mode, levelData, options: { ...(options||{}), playMode: playModeActive } };
+
+  // reset
+  score = 0; combo = 0;
+  if (typeof options.speedBase === 'number') baseScrollSpeed = options.speedBase;
+  scrollSpeed = baseScrollSpeed;
+  groups = []; pops = []; stars = [];
+  flashes = []; toasts = [];
+  scrollSpeed = baseScrollSpeed;
+  document.getElementById('score').innerText = "0";
+  lyricsEl.innerText = "";
+
+  // mode
+  gameMode = mode;
+  isSongMode = (mode === 'song');
+  practiceIndex = 0;
+  scaleIndex = 0;
+
+  if (mode === 'scale') {
+    spawnInterval = options.interval ?? 2000;
+    spawnMinInterval = options.minInterval ?? 900;
+    spawnStep = options.step ?? 120;
+    startBannerText = "ドレミの れんしゅう！";
+  } else {
+    spawnInterval = 1800;
+    spawnMinInterval = 900;
+    spawnStep = 120;
+    startBannerText = "";
+  }
+
+  practiceOrder = options.order || 'cycle';
+  currentLevelChords = Array.isArray(levelData) ? levelData : (levelData ? [levelData] : ['C']);
+
+  document.getElementById('menu-overlay').style.display = 'none';
+  const ro = document.getElementById('result-overlay'); if (ro) ro.style.display = 'none';
+  const po = document.getElementById('pause-overlay'); if (po) po.style.display = 'none';
+  stopBtnEl.innerText = 'ストップ';
+  document.getElementById('score-panel').style.display = 'block';
+  timerPanel.style.display = 'block';
+  stopBtnEl.style.display = 'block';
+  // 90秒タイマー
+  gameEndAt = performance.now() + GAME_DURATION_MS;
+  timerEl.innerText = Math.ceil(GAME_DURATION_MS/1000);
+  document.getElementById('back-btn').style.display = 'block';
+
+  // バナーは曲だけ/必要な時だけ
+  titleOpacity = (mode === 'song') ? 2.0 : 0.0;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function playTick() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+}
+
+class FlashText {
+  constructor(text, x, y) {
+    this.text = text; this.x = x; this.y = y;
+    this.life = 1.0; this.scale = 0.6; this.t = 0;
+  }
+  update() { this.t++; this.life -= 0.02; this.scale = Math.min(1.35, this.scale + 0.06); }
+  draw() {
+    const wob = Math.sin(this.t * 0.6) * 6;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.life);
+    ctx.translate(this.x + wob, this.y);
+    ctx.scale(this.scale, this.scale);
+    ctx.font = "900 92px sans-serif";
+    ctx.textAlign = "center";
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 10;
+    ctx.strokeText(this.text, 0, 0);
+    ctx.fillStyle = "#ff7a3d";
+    ctx.fillText(this.text, 0, 0);
+    ctx.restore();
+  }
+}
+
+class ToastText {
+  constructor(text, x, y) {
+    this.text = text; this.x = x; this.y = y;
+    this.life = 1.0;
+  }
+  update() { this.life -= 0.03; }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.life) * 0.55;
+    ctx.font = "900 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#333";
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.restore();
+  }
+}
+
+class Star {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.vx = (Math.random() - 0.5) * 20; this.vy = (Math.random() - 0.5) * 20;
+    this.life = 1.0; this.color = `hsl(${Math.random() * 360}, 100%, 75%)`; this.size = Math.random() * 8 + 4;
+  }
+  update() { this.x += this.vx; this.y += this.vy; this.life -= 0.025; this.vy += 0.3; }
+  draw() {
+    ctx.save(); ctx.globalAlpha = this.life; ctx.fillStyle = this.color;
+    ctx.beginPath();
+    for(let i=0; i<5; i++){
+      ctx.lineTo(this.x + Math.cos((18+i*72)*Math.PI/180)*this.size, this.y + Math.sin((18+i*72)*Math.PI/180)*this.size);
+      ctx.lineTo(this.x + Math.cos((54+i*72)*Math.PI/180)*this.size/2, this.y + Math.sin((54+i*72)*Math.PI/180)*this.size/2);
+    }
+    ctx.fill(); ctx.restore();
+  }
+}
+
+class PopText {
+  constructor(text, x, y, isCombo = false) {
+    this.text = text; this.x = x; this.y = y; this.life = 1.0; this.scale = 0.5; this.isCombo = isCombo;
+  }
+  update() { this.life -= 0.02; this.y -= 2; this.scale = Math.min(1.2, this.scale + 0.05); }
+  draw() {
+    ctx.save(); ctx.globalAlpha = this.life;
+    ctx.translate(this.x, this.y); ctx.scale(this.scale, this.scale);
+    ctx.font = this.isCombo ? "bold 50px sans-serif" : "italic 900 80px sans-serif";
+    ctx.textAlign = "center"; ctx.strokeStyle = "white"; ctx.lineWidth = 8;
+    ctx.strokeText(this.text, 0, 0);
+    ctx.fillStyle = this.isCombo ? "#ffde59" : "#ff66c4";
+    ctx.fillText(this.text, 0, 0); ctx.restore();
+  }
+}
+
+class ChordGroup {
+  constructor(chordData, lyrics = "") {
+    this.chord = chordData; this.lyrics = lyrics;
+    this.x = canvas.width + 100; this.active = true; this.ticked = false;
+  }
+  update() { 
+    this.x -= scrollSpeed; 
+    if (!this.ticked && this.x <= NUT_X) {
+      playTick(); if (this.lyrics) lyricsEl.innerText = this.lyrics;
+      this.ticked = true;
+    }
+  }
+  draw(isTarget) {
+    const centerY = canvas.height / 2;
+
+if (isTarget && this.active) {
+  // サポート（ナット位置に“うっすらガイド”）
+  // 早すぎる/消えすぎ対策：距離に応じて濃さを変えて、ナットを少し過ぎても残す
+  const dx = Math.abs(this.x - NUT_X);
+  const inWindow = (this.x < NUT_X + SUPPORT_AHEAD) && (this.x > NUT_X - SUPPORT_PAST);
+  if (inWindow) {
+    const t = Math.max(0, Math.min(1, 1 - (dx / SUPPORT_AHEAD))); // 近いほど 1
+    const alpha = 0.22 + t * 0.58;  // 近いほど濃く
+    const size = 32 + t * 10;       // 近いほど少し大きく
+    const blur = (t < 0.55);
+
+    const hasOpen = this.chord.fingers.some(ff => ff.f === 0);
+    if (hasOpen) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.95, alpha + 0.15);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      const openHintY = Math.max(60, centerY - 185);
+      ctx.fillText("0 は ひらく（開放）", NUT_X + 160, openHintY);
+      ctx.restore();
+    }
+
+    this.chord.fingers.forEach(f => {
+      if (f.f > 0) this.drawCircle(NUT_X + (f.f * fretWidth) - (fretWidth / 2), centerY + (f.s - 2.5) * 75, f.txt, size, alpha, blur);
+      else this.drawCircle(NUT_X, centerY + (f.s - 2.5) * 75, '0', size, alpha, blur);
+    });
+  }
+}
+    if (this.active) {
+      const targetFinger = this.chord.fingers[this.chord.targetIdx];
+      const nameX = (targetFinger.f === 0) ? this.x : this.x + (targetFinger.f * fretWidth) - (fretWidth / 2);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 60px sans-serif"; ctx.textAlign = "center";
+      const topTextY = Math.max(80, centerY - 180);
+      if (gameMode === 'scale') { ctx.fillText(this.chord.name || "", nameX, topTextY); }
+      const isWaitTarget = (waitHold && playModeActive === 'WAIT' && waitTargetGroup === this);
+      const blinkT = performance.now();
+      const blink = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(blinkT / 140));
+      this.chord.fingers.forEach(f => {
+        const fx = (f.f === 0) ? this.x : this.x + (f.f * fretWidth) - (fretWidth / 2);
+        const fy = centerY + (f.s - 2.5) * 75;
+        if (isWaitTarget) {
+          this.drawCircle(fx, fy, f.txt, 48, 0.22 + blink * 0.35, true);
+          this.drawCircle(fx, fy, f.txt, 42, blink, false);
+        } else {
+          this.drawCircle(fx, fy, f.txt, 40, 1.0, false);
+        }
+      });
+    }
+  }
+  drawCircle(x, y, txt, size, alpha, isBlur) {
+    ctx.save(); ctx.globalAlpha = alpha; if (isBlur) ctx.filter = "blur(2px)";
+    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fillStyle = (txt === '薬') ? '#5271ff' : (txt === '中' ? '#ff66c4' : (txt === '人' ? '#ff914d' : '#888'));
+    ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.stroke();
+    ctx.filter = "none"; ctx.fillStyle = "#fff"; ctx.font = `bold ${size * 0.8}px sans-serif`;
+    ctx.textAlign = "center"; ctx.fillText(txt, x, y + size * 0.3); ctx.restore();
+  }
+}
+
+
+function stopGame(reason = 'STOP') {
+  gameState = 'MENU';
+  // 念のためオーバーレイを閉じる
+  const po = document.getElementById('pause-overlay'); if (po) po.style.display = 'none';
+  const ro = document.getElementById('result-overlay'); if (ro) ro.style.display = 'none';
+  stopBtnEl.innerText = 'ストップ';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  document.getElementById('menu-overlay').style.display = 'flex';
+  document.getElementById('score-panel').style.display = 'none';
+  timerPanel.style.display = 'none';
+  stopBtnEl.style.display = 'none';
+  lyricsEl.innerText = "";
+}
+
+
+// ===== Pause / Result control =====
+let pausedRemainMs = 0;
+let lastStart = null;
+
+function pauseGame(){
+  if (gameState !== 'PLAY') return;
+  const now = performance.now();
+  pausedRemainMs = Math.max(0, gameEndAt - now);
+  gameState = 'PAUSE';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  document.getElementById('pause-overlay').style.display = 'flex';
+}
+
+function resumeGame(){
+  if (gameState !== 'PAUSE') return;
+  gameEndAt = performance.now() + pausedRemainMs;
+  gameState = 'PLAY';
+  document.getElementById('pause-overlay').style.display = 'none';
+  stopBtnEl.innerText = 'ストップ';
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function goMenuFromPause(){
+  // ポーズ中にメニューへ（そのまま終わる）
+  document.getElementById('pause-overlay').style.display = 'none';
+  stopGame('STOP');
+}
+
+function endGame(){
+  gameState = 'RESULT';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  stopBtnEl.style.display = 'none';
+  timerPanel.style.display = 'none';
+
+  // 結果表示
+  const res = document.getElementById('result-overlay');
+  document.getElementById('result-score').innerText = String(score);
+  document.getElementById('result-title').innerText = 'そこまで！';
+  document.getElementById('result-msg').innerText = (score >= 250) ? 'すごい！またやろう！'
+    : (score >= 140) ? 'いいね！このちょうし！'
+    : 'だいじょうぶ！つぎは、もっとのびるよ！';
+  res.style.display = 'flex';
+}
+
+function restartLast(){
+  if (!lastStart) { goMenu(); return; }
+  // 結果を閉じる
+  document.getElementById('result-overlay').style.display = 'none';
+  // 前回と同じモードで再開
+  initGame(lastStart.mode, lastStart.levelData, lastStart.options);
+}
+
+function goMenu(){
+  document.getElementById('result-overlay').style.display = 'none';
+  document.getElementById('pause-overlay').style.display = 'none';
+  stopGame('MENU');
+}
+
+function handleAction() {
+  if (gameState !== 'PLAY') return;
+
+  // 近いターゲットを1つだけ選ぶ（0弦も含めて分かりやすく）
+  let target = null;
+  let best = Infinity;
+  // まちモードで止まっている間は、同じターゲットだけを見る（挙動安定）
+  if (waitHold && playModeActive === 'WAIT' && waitTargetGroup && waitTargetGroup.active) {
+    target = waitTargetGroup;
+    best = Math.abs(target.x - NUT_X);
+  } else {
+  for (let i = 0; i < groups.length; i++) {
+    const g = groups[i];
+    if (!g.active) continue;
+    const dx = g.x - NUT_X;
+    if (dx > SUPPORT_AHEAD) continue;
+    if (dx < -SUPPORT_PAST) continue;
+    const d = Math.abs(dx);
+    if (d < best) { best = d; target = g; }
+  }
+  }
+
+  let hit = false;
+  let skipMissPenalty = false;
+  if (target) {
+    const dist = Math.abs(target.x - NUT_X);
+    const win = (playModeActive === 'TEST') ? (HIT_WINDOW * 1.9) : HIT_WINDOW;
+    if (dist < win) {
+      hit = true;
+      target.active = false;
+      // まちモードで止まっていたら、ここで再開（スピード0のままにならない）
+      if (waitHold && playModeActive === 'WAIT') {
+        waitHold = false;
+        scrollSpeed = (waitHoldPrevSpeed && waitHoldPrevSpeed > 0) ? waitHoldPrevSpeed : (scrollSpeed > 0 ? scrollSpeed : MIN_SPEED);
+        waitTargetGroup = null;
+        lastSpawn = performance.now(); // まちモード復帰直後に連続spawnしないように
+        flashes.push(new FlashText('できた！', canvas.width/2, canvas.height/2 - 20));
+        toasts.push(new ToastText('OK！つづけよう'));
+      }
+      combo++;
+      if (combo % 5 === 0) {
+        flashes.push(new FlashText('スピードアップ！！', canvas.width/2, canvas.height/2 - 80));
+    if (AUTO_SPEED) { scrollSpeed = Math.min(MAX_SPEED, scrollSpeed * SPEEDUP_MULT); }
+      }
+
+      const isPerfect = (dist < PERFECT_WINDOW);
+      const bonus = isPerfect ? 15 : 10;
+      score += bonus;
+      document.getElementById('score').innerText = score;
+
+      const msg = isPerfect ? "パーフェクト！" : "いいかんじ！";
+      pops.push(new PopText(msg, canvas.width/2, canvas.height/2));
+      pops.push(new PopText(`${combo} れんぞく！`, canvas.width/2, canvas.height/2 + 72, true));
+      for(let i=0; i<20; i++) stars.push(new Star(NUT_X, canvas.height/2));
+    } else {
+      if (playModeActive === 'WAIT') {
+        // まちモード：ミスしたら止めて、同じ場所でHITできるまで待つ
+        waitHold = true;
+        waitHoldPrevSpeed = scrollSpeed;
+        scrollSpeed = 0;
+        waitTargetGroup = target;
+        lastSpawn = performance.now(); // 止めた直後に溜まったspawnが出ないように
+        // 弾く（タップする）位置まで寄せて、点滅させる
+        if (target.x > NUT_X) target.x = NUT_X;
+        combo = 0;
+        flashes.push(new FlashText('おちついて！', canvas.width/2, canvas.height/2));
+        toasts.push(new ToastText('ひかる○をタップしてね'));
+        skipMissPenalty = true;
+      }
+    }
+  }
+
+  if (!hit && !skipMissPenalty) {
+    if (combo > 0) combo = 0;
+    if (AUTO_SPEED) {
+      scrollSpeed = Math.max(MIN_SPEED, scrollSpeed / 1.12);
+      toasts.push(new ToastText('スピードダウン', canvas.width/2, 150));}
+  }
+}
+
+
+function drawFretboard() {
+  const midY = canvas.height / 2;
+  fretWidth = (canvas.width - NUT_X - 100) / 12;
+  ctx.fillStyle = "#6d4c41"; ctx.fillRect(NUT_X, midY - 150, canvas.width, 300);
+  for (let i = 0; i <= 12; i++) {
+    const x = NUT_X + i * fretWidth;
+    ctx.strokeStyle = (i === 0) ? "#fff" : "#a1887f"; ctx.lineWidth = (i === 0) ? 12 : 3;
+    ctx.beginPath(); ctx.moveTo(x, midY - 150); ctx.lineTo(x, midY + 150); ctx.stroke();
+  }
+    // 左の 1A/2E/3C/4G（チューニング画面と同じ見た目・位置）
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < 4; i++) {
+    const y = midY + (i - 1.5) * 75;
+
+    // 色つき丸
+    ctx.beginPath();
+    ctx.fillStyle = STRING_COLORS[i];
+    ctx.globalAlpha = 0.85;
+    ctx.arc(MARK_CX, y, MARK_R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    // ラベル
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(STRING_LABELS[i], MARK_CX, y);
+  }
+  ctx.restore();
+
+  // 弦ライン
+  for (let i = 0; i < 4; i++) {
+    const y = midY + (i - 1.5) * 75;
+    ctx.strokeStyle = STRING_COLORS[i];
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(NUT_X, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+}
+
+function gameLoop(time) {
+  if (gameState !== 'PLAY') return;
+  if (!lastFrameT) lastFrameT = time;
+  // まちモードで止まっている間はカウントダウンを止める
+  if (waitHold) {
+    const dt = Math.max(0, time - lastFrameT);
+    gameEndAt += dt;
+  }
+  lastFrameT = time;
+
+  // 90秒カウントダウン
+  const now = performance.now();
+  const remainMs = Math.max(0, gameEndAt - now);
+  timerEl.innerText = Math.ceil(remainMs / 1000);
+  if (remainMs <= 0) { endGame(); return; }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawFretboard();
+
+  // spawn
+if (!waitHold && (time - lastSpawn > spawnInterval)) {
+  if (isSongMode) {
+    const data = SONG_DATA[songIndex % SONG_DATA.length];
+    groups.push(new ChordGroup(data.lib[data.key], data.lyrics));
+    songIndex++;
+  } else if (gameMode === 'scale') {
+    const k = scaleSeq[scaleIndex % scaleSeq.length];
+    groups.push(new ChordGroup(SOLO_LIB[k], "")); // スケールは歌詞なし
+    scaleIndex++;
+
+    // 1周ごとに少し速く（下限まで）
+    if (scaleIndex % scaleSeq.length === 0) {
+      spawnInterval = Math.max(spawnMinInterval, spawnInterval - spawnStep);
+    }
+  } else {
+    // practice chords: 反復（cycle）を基本にする
+    let chordKey;
+    if (practiceOrder === 'random') {
+      chordKey = currentLevelChords[Math.floor(Math.random() * currentLevelChords.length)];
+    } else {
+      chordKey = currentLevelChords[practiceIndex % currentLevelChords.length];
+      practiceIndex++;
+    }
+    groups.push(new ChordGroup(CHORD_LIB[chordKey], "そのちょうし！"));
+  }
+  lastSpawn = time;
+}
+
+
+// --- どれを“次のターゲット”にするか（近いものを1つだけ） ---
+let targetIdx = -1;
+let bestDist = Infinity;
+for (let i = 0; i < groups.length; i++) {
+  const g = groups[i];
+  if (!g.active) continue;
+  const dx = g.x - NUT_X;
+  // サポート表示範囲内だけ（早すぎ対策）
+  if (dx > SUPPORT_AHEAD) continue;
+  if (dx < -SUPPORT_PAST) continue;
+  const d = Math.abs(dx);
+  if (d < bestDist) { bestDist = d; targetIdx = i; }
+}
+
+
+// --- Chord HUD（コード名はここ1か所だけに出す：被り防止） ---
+(function updateChordHud(){
+  if (!chordHUDEl) return;
+  if (gameMode === 'practice' || gameMode === 'song') {
+    let name = '';
+    if (targetIdx >= 0 && groups[targetIdx] && groups[targetIdx].chord) {
+      name = groups[targetIdx].chord.name || '';
+    } else {
+      // 予備：一番手前のactiveを探す
+      for (let i = 0; i < groups.length; i++){
+        const g = groups[i];
+        if (g && g.active && g.chord && g.chord.name){ name = g.chord.name; break; }
+      }
+    }
+    chordHUDEl.style.display = name ? 'block' : 'none';
+    chordHUDEl.textContent = name;
+  } else {
+    chordHUDEl.style.display = 'none';
+    chordHUDEl.textContent = '';
+  }
+})();
+
+// groups update/draw + cleanup
+for (let i = groups.length - 1; i >= 0; i--) {
+  const g = groups[i];
+  const isTarget = (i === targetIdx);
+  g.update(); g.draw(isTarget);
+
+  // 画面外に出たら掃除（配列が増え続けないように）
+  if (g.x < -400) groups.splice(i, 1);
+}
+
+// stars/pops: 後ろから削除（安定）
+for (let i = stars.length - 1; i >= 0; i--) { const s = stars[i]; s.update(); s.draw(); if (s.life <= 0) stars.splice(i, 1); }
+for (let i = pops.length - 1; i >= 0; i--) { const p = pops[i]; p.update(); p.draw(); if (p.life <= 0) pops.splice(i, 1); }
+
+  if (titleOpacity > 0) {
+    ctx.save(); ctx.globalAlpha = Math.min(1.0, titleOpacity);
+    ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.font = "bold 60px sans-serif";
+    ctx.fillText(startBannerText || "メロディも ひいてみよう！", canvas.width/2, canvas.height/2);
+    ctx.restore(); titleOpacity -= 0.015;
+  }
+  // flashes/toasts（派手なスピードUP / 控えめスピードDOWN）
+  for (let i = flashes.length - 1; i >= 0; i--) {
+    const f = flashes[i];
+    f.update(); f.draw();
+    if (f.life <= 0) flashes.splice(i, 1);
+  }
+  for (let i = toasts.length - 1; i >= 0; i--) {
+    const t = toasts[i];
+    t.update(); t.draw();
+    if (t.life <= 0) toasts.splice(i, 1);
+  }
+
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+
+function applyViewportSize() {
+  const vv = window.visualViewport;
+  const w = Math.round(vv ? vv.width : window.innerWidth);
+  const h = Math.round(vv ? vv.height : window.innerHeight);
+  canvas.width = w;
+  canvas.height = h;
+
+  // iOSの表示領域ズレ対策（固定UIを“内側”に寄せる）
+  const top = Math.round(vv ? vv.offsetTop : 0);
+  const left = Math.round(vv ? vv.offsetLeft : 0);
+  document.documentElement.style.setProperty('--vvTop', top + 'px');
+  document.documentElement.style.setProperty('--vvLeft', left + 'px');
+}
+window.addEventListener('resize', applyViewportSize);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', applyViewportSize);
+  // iOS Safari はアドレスバーの出入りで高さが変わるので scroll も拾う
+  window.visualViewport.addEventListener('scroll', applyViewportSize);
+}
+applyViewportSize();
+// 入力は canvas にだけ付ける（メニュー操作を邪魔しない）
+canvas.addEventListener('mousedown', (e) => { if (gameState === 'PLAY') handleAction(); });
+canvas.addEventListener('touchstart', (e) => { if (gameState === 'PLAY') { e.preventDefault(); handleAction(); } }, {passive: false});
+
+// 念のため：メニューのonclickが効かない環境でも動くように直付け
+document.querySelectorAll('#menu-overlay .mode1').forEach(b => b.addEventListener('click', startScale));
+document.querySelectorAll('#menu-overlay .mode2').forEach(b => b.addEventListener('click', startChordsEasy));
+document.querySelectorAll('#menu-overlay .mode3').forEach(b => b.addEventListener('click', startChordsHard));
+document.querySelectorAll('#menu-overlay .mode4').forEach(b => b.addEventListener('click', startSongTwinkle));
+window.startScale = startScale; window.startChordsEasy = startChordsEasy; window.startChordsHard = startChordsHard; window.startSongTwinkle = startSongTwinkle;
+
+</script>
+</body>
+</html>
