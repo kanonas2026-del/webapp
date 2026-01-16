@@ -373,6 +373,33 @@ canvas{ display:block; width:100%; height:100%; touch-action:none; }
   letter-spacing: 0.02em;
   box-shadow: 0 10px 24px rgba(0,0,0,0.14);
 }
+
+html, body{
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+#gameCanvas{
+  position: fixed;
+  left: 0; top: 0;
+  width: 100vw;
+  height: 100svh;
+  height: 100dvh;
+  touch-action: none;
+}
+
+
+/* === FEEDBACK BOX (data collection helper) === */
+.feedback-box{ margin-top:14px; padding:12px 12px 10px; border-radius:16px; background: rgba(255,255,255,0.88); box-shadow: 0 10px 24px rgba(0,0,0,0.10); }
+.feedback-box .fb-title{ font-weight:900; font-size:14px; margin:0 0 8px; }
+.feedback-box .fb-sub{ font-size:12px; line-height:1.35; margin:0 0 10px; opacity:0.9; }
+.feedback-box .fb-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.fb-btn{ border:0; border-radius:999px; padding:10px 14px; font-weight:900; font-size:13px; box-shadow: 0 10px 18px rgba(0,0,0,0.10); cursor:pointer; }
+.fb-btn.primary{ background:#111; color:#fff; }
+.fb-btn.ghost{ background: rgba(255,255,255,0.95); color:#111; }
+.fb-toast{ position:fixed; left:50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  z-index: 9999; background: rgba(0,0,0,0.78); color:#fff; padding:10px 14px; border-radius:14px; font-weight:900; font-size:13px; display:none; }
+
 </style>
 </head>
 <body>
@@ -425,6 +452,16 @@ canvas{ display:block; width:100%; height:100%; touch-action:none; }
       </div>
     </div>
 
+
+    <div class="feedback-box">
+      <div class="fb-title">📣 フィードバック（データ収集）</div>
+      <p class="fb-sub">動作チェックの結果を、かんたんに送れます。<br>（GoogleフォームURLは下のJSで差し替え）</p>
+      <div class="fb-actions">
+        <button class="fb-btn primary" type="button" onclick="openFeedbackForm()">アンケートをひらく</button>
+        <button class="fb-btn ghost" type="button" onclick="copyDebugReport()">端末情報をコピー</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -455,6 +492,7 @@ canvas{ display:block; width:100%; height:100%; touch-action:none; }
       </div>
     </div>
   </div>
+  <div class="fb-toast" id="fb-toast"></div>
   <canvas id="gameCanvas"></canvas>
 
 <script>
@@ -466,6 +504,77 @@ const timerPanel = document.getElementById('timer-panel');
 const timerEl = document.getElementById('timer');
 const chordHUDEl = document.getElementById('chordHud');
 const stopBtnEl = document.getElementById('stopBtn');
+
+
+// =============================
+// FEEDBACK / DATA COLLECTION
+// =============================
+// 1) Googleフォームを作って、ここにURLを貼ってください
+//    例: https://forms.gle/xxxxxxxxxxxxxxxxx
+const FEEDBACK_FORM_URL = "https://forms.gle/REPLACE_ME";
+
+function showFbToast(msg){
+  const el = document.getElementById('fb-toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(showFbToast._t);
+  showFbToast._t = setTimeout(()=>{ el.style.display='none'; }, 1600);
+}
+
+function buildDebugReport(){
+  const vv = window.visualViewport;
+  const info = {
+    when: new Date().toISOString(),
+    url: location.href,
+    ua: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    screen: { w: screen.width, h: screen.height, dpr: window.devicePixelRatio },
+    viewport: { w: innerWidth, h: innerHeight, vvW: vv? vv.width: null, vvH: vv? vv.height: null },
+    orientation: (screen.orientation && screen.orientation.type) ? screen.orientation.type : (window.orientation ?? null),
+    game: {
+      state: gameState,
+      playModeSelected,
+      playModeActive,
+      score,
+      timerSec: Number(timerEl?.textContent||0)
+    }
+  };
+  return info;
+}
+
+function openFeedbackForm(){
+  // URL未設定のときは、先にコピーを促す
+  if(!FEEDBACK_FORM_URL || FEEDBACK_FORM_URL.includes('REPLACE_ME')){
+    copyDebugReport();
+    alert('GoogleフォームURLが未設定です。
+
+① 先に「端末情報をコピー」→フォームに貼り付け
+② その後、game.html内の FEEDBACK_FORM_URL をあなたのフォームURLに差し替えてください。');
+    return;
+  }
+  window.open(FEEDBACK_FORM_URL, '_blank');
+}
+
+async function copyDebugReport(){
+  const text = JSON.stringify(buildDebugReport(), null, 2);
+  try{
+    await navigator.clipboard.writeText(text);
+    showFbToast('コピーしました');
+  }catch(e){
+    // iOSでclipboardが落ちる場合のフォールバック
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showFbToast('コピーしました');
+  }
+}
 
 let gameState = 'MENU';
 
@@ -514,6 +623,8 @@ const MIN_SPEED = 2.6;
 let fretWidth = 0;
 let baseScrollSpeed = 3.5;
 let scrollSpeed = baseScrollSpeed;
+  // PATCH: 安定化（Stop/再開で速度がブレない）
+  lastFrameT = 0;
 let currentLevelChords = [];
 let gameMode = 'practice'; // 'practice' | 'scale' | 'song'
 let practiceOrder = 'cycle';
@@ -859,6 +970,8 @@ function resumeGame(){
   gameState = 'PLAY';
   document.getElementById('pause-overlay').style.display = 'none';
   stopBtnEl.innerText = 'ストップ';
+  // PATCH: 再開直後のdtスパイクで速度が変わるのを防止
+  lastFrameT = 0;
   rafId = requestAnimationFrame(gameLoop);
 }
 
@@ -1165,6 +1278,11 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener('scroll', applyViewportSize);
 }
 applyViewportSize();
+// PATCH: 回転/リサイズ時だけ追従（Stop/タップでコロコロ変えない）
+window.addEventListener('resize', applyViewportSize);
+window.addEventListener('orientationchange', ()=>{ setTimeout(applyViewportSize, 150); });
+if (window.visualViewport) { window.visualViewport.addEventListener('resize', ()=>{ applyViewportSize(); }); }
+
 // 入力は canvas にだけ付ける（メニュー操作を邪魔しない）
 canvas.addEventListener('mousedown', (e) => { if (gameState === 'PLAY') handleAction(); });
 canvas.addEventListener('touchstart', (e) => { if (gameState === 'PLAY') { e.preventDefault(); handleAction(); } }, {passive: false});
