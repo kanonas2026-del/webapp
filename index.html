@@ -2,122 +2,77 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>はじめようウクレレ（仮）</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ウクレレであそぼう</title>
 <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  background: #f4f9ff;
-  font-family: "Hiragino Sans", "Arial", sans-serif;
-}
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    position: fixed;
+    background: #f4f9ff;
+    font-family: "Hiragino Sans", "Arial", sans-serif;
+    touch-action: none;
+  }
+  body { display: flex; justify-content: center; align-items: center; }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  /* タイトル */
+  .title {
+    position: fixed; top: 6vh; right: 6vw;
+    font-size: clamp(24px, 6vw, 34px);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: #333; z-index: 10; user-select: none;
+  }
 
-/* ===== タイトル ===== */
-.title {
-  position: fixed;
-  top: 6vh;
-  right: 6vw;
-  font-size: 34px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: #333;
-  z-index: 10;
-  user-select: none;
-}
+  /* メニュー */
+  .menu {
+    position: fixed; right: 6vw; top: 24vh;
+    display: flex; flex-direction: column; gap: 14px; z-index: 10;
+  }
+  .menu button {
+    min-width: 180px; padding: 14px 18px;
+    font-size: 17px; font-weight: 600; color: #333;
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid #ddd; border-radius: 12px;
+    cursor: pointer; text-align: left;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    transition: transform 0.1s;
+    text-decoration: none; display: block;
+  }
+  .menu button:active { transform: scale(0.98); }
+  .menu button.primary { background: #eef6ff; border-color: #c9ddff; color: #234; }
 
-/* ===== メニュー ===== */
-.menu {
-  position: fixed;
-  right: 6vw;
-  top: 24vh;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  z-index: 10;
-}
-
-.menu button {
-  min-width: 180px;
-  padding: 14px 18px;
-  font-size: 17px;
-  font-weight: 600;
-  color: #333;
-  background: rgba(255,255,255,0.9);
-  border: 1.5px solid #ddd;
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: left;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-}
-
-.menu button.primary {
-  background: #eef6ff;
-  border-color: #c9ddff;
-  color: #234;
-}
-
-.menu button:hover {
-  background: #ffffff;
-}
-
-/* ===== SVGは静止 ===== */
-svg {
-  width: 100vw;
-  height: 100vh;
-  transform: translateX(-22vw);
-}
-
-/* ===== 揺らすのはラッパーだけ ===== */
-.palm-wrap {
-  width: 100vw;
-  height: 100vh;
-  animation: palm-sway 12s ease-in-out infinite;
-  transform-origin: 35% 90%;
-}
-
-@keyframes palm-sway {
-  0%,100% { transform: rotate(-0.8deg); }
-  50%     { transform: rotate(0.8deg); }
-}
+  /* 背景アニメーション */
+  .palm-wrap {
+    width: 100vw; height: 100vh;
+    animation: palm-sway 12s ease-in-out infinite;
+    transform-origin: 35% 90%;
+    pointer-events: none;
+  }
+  svg { width: 100vw; height: 100vh; transform: translateX(-22vw); }
+  @keyframes palm-sway {
+    0%,100% { transform: rotate(-0.8deg); }
+    50%     { transform: rotate(0.8deg); }
+  }
 </style>
 </head>
-
 <body>
 
-<div class="title">はじめようウクレレ（仮）</div>
+<div class="title">ウクレレであそぼう</div>
 
 <div class="menu">
-  <button id="btn-start" class="primary">▶ はじめる</button>
-  <button id="btn-tuning">🎵 チューニング</button>
-  <button id="btn-help">？ つかいかた</button>
+  <button id="btn-start" class="primary" onclick="location.href='game.html'">▶ はじめる</button>
+  <button id="btn-tuning" onclick="location.href='tuning.html'">🎵 チューニング</button>
+  <button id="btn-help" onclick="alert('音に合わせて画面をタップしたり、実際にウクレレを弾いて遊ぶゲームです！')">？ つかいかた</button>
 </div>
 
 <div class="palm-wrap">
 <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-
   <ellipse cx="400" cy="500" rx="260" ry="60" fill="#cfeeb0"/>
-
-  <path d="
-    M360 480
-    C300 360, 340 260, 330 160
-    C320 80, 300 40, 280 20
-    L320 20
-    C360 60, 380 120, 390 200
-    C400 300, 380 380, 420 480
-    Z"
-    fill="#7a4a21"/>
-
+  <path d="M360 480 C300 360, 340 260, 330 160 C320 80, 300 40, 280 20 L320 20 C360 60, 380 120, 390 200 C400 300, 380 380, 420 480 Z" fill="#7a4a21"/>
   <path d="M310 350 Q350 340 380 330" stroke="#d8b04c" stroke-width="8" fill="none"/>
   <path d="M300 300 Q340 290 370 280" stroke="#d8b04c" stroke-width="8" fill="none"/>
   <path d="M295 250 Q330 240 360 230" stroke="#d8b04c" stroke-width="8" fill="none"/>
-
   <g fill="#6aaa1f">
     <path d="M330 40 C180 20, 60 120, 40 200"/>
     <path d="M330 40 C200 0, 120 40, 90 100"/>
@@ -125,10 +80,8 @@ svg {
     <path d="M330 40 C480 0, 620 40, 660 120"/>
     <path d="M330 50 C310 10, 330 0, 350 -20"/>
   </g>
-
   <circle cx="340" cy="60" r="18" fill="#c8b04a"/>
   <circle cx="365" cy="65" r="18" fill="#c8b04a"/>
-
   <g transform="translate(440 420) rotate(-15)">
     <ellipse cx="50" cy="80" rx="45" ry="60" fill="#c68642"/>
     <ellipse cx="50" cy="80" rx="12" ry="16" fill="#5a3a1a"/>
@@ -137,23 +90,8 @@ svg {
     <line x1="48" y1="10" x2="48" y2="150" stroke="#ffffff" stroke-width="2"/>
     <line x1="52" y1="10" x2="52" y2="150" stroke="#ffffff" stroke-width="2"/>
   </g>
-
 </svg>
 </div>
-
-<script>
-document.getElementById("btn-start").onclick = () => {
-  alert("▶ はじめる（練習画面へ）");
-};
-
-document.getElementById("btn-tuning").onclick = () => {
-  alert("🎵 チューニング画面へ");
-};
-
-document.getElementById("btn-help").onclick = () => {
-  alert("？ つかいかた");
-};
-</script>
 
 </body>
 </html>
