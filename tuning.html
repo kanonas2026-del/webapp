@@ -2,9 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ウクレレ診断 - チューニング</title>
   <style>
+    :root{ --vh: 1vh; }
+
     /* スタイルは前回の「グレーアウト」と「弦の色」を維持 */
     body { margin: 0; background: #4a3728; color: #fff; font-family: sans-serif; overflow: hidden; touch-action: none; }
 
@@ -80,7 +82,7 @@
       .ui-panel{ bottom: calc(var(--safe-bottom) + 10px); }
     }
 
-    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: 100vh; position: relative; }
+    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: calc(var(--vh) * 100); position: relative; }
     canvas { display: block; width: 100%; height: 100%; }
     #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .start-btn { background: #ff914d; color: white; border: none; padding: 25px 50px; font-size: 24px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 0 #d97b41; }
@@ -235,9 +237,8 @@
 .diag-personality{margin-top:16px; font-size:32px; font-weight:900; color:#3a2a1a; text-align:center;}
 
 
-.version-badge{position:fixed;left:10px;bottom:10px;z-index:9999;font-size:11px;font-weight:800;color:#234;background:rgba(255,255,255,0.72);border:1px solid rgba(0,0,0,0.08);padding:4px 8px;border-radius:10px;pointer-events:none;}
+#version-badge{position:fixed;right:10px;bottom:10px;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-weight:800;font-size:12px;padding:6px 10px;border-radius:14px;backdrop-filter:blur(4px);}
 
-  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -247,7 +248,6 @@
   </div>
 
   <div class="nav-back"><a href="index.html">🏝️ TOPへ</a></div>
-  <div class="version-badge">v_tuning_safe_2026-01-18a</div>
 
   <section id="screen-tuning">
     <div id="guide-msg">1げんを ひいてみよう</div>
@@ -282,7 +282,6 @@
       <div class="diag-item"><div class="diag-label">メンテナンス</div><div id="diag-maint" class="diag-value"></div></div>
       </div>
       <button onclick="resetAll()" style="background:#7ed957; border:none; padding:12px 25px; border-radius:15px; color:white; font-weight:bold; cursor:pointer;">もういちど</button>
-      <button onclick="location.href='game.html'" style="margin-top:10px; background:#ff914d; border:none; padding:12px 25px; border-radius:15px; color:white; font-weight:bold; cursor:pointer;">🪕 ゲームへ</button>
     </div>
 
     <div class="ui-panel">
@@ -335,49 +334,6 @@ function getPluckRiseRms(){
   if (IS_IOS && (currentTargetIdx === 1 || currentTargetIdx === 2)) return PLUCK_RISE_RMS * 0.28; // 2げん/3げん
   if (IS_IOS && (currentTargetIdx === 3)) return PLUCK_RISE_RMS * 0.34; // 4げん
   return PLUCK_RISE_RMS;
-}
-
-// ===== 追加: ゲーム用しきい値の保存 =====
-const KEY_GAME_THRESH = 'uk_game_thresholds_v1';
-
-function clamp(x, lo, hi){ return Math.max(lo, Math.min(hi, x)); }
-
-function computeGameThresholds(noiseRms, pluckPeak){
-  const N = (Number(noiseRms) > 0) ? Number(noiseRms) : 0.004;
-  let P = Number(pluckPeak);
-  if (!(P > N)) P = N + 0.012;
-
-  // ノイズと「ふつうの弾き方」の間の45%あたりをしきい値にする
-  const high = clamp(N + (P - N) * 0.45, N * 2.2, P * 0.85);
-  const rise = clamp((high - N) * 0.35, 0.0007, high * 0.60);
-  return { high, rise, noise: N, pluck: P };
-}
-
-function safeSetLS(key, value){
-  try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
-}
-
-function saveGameThresholdsFromTuning(){
-  try{
-    if (!DIAG) return;
-    const N = Number(DIAG.noiseRms || NOISE_RMS || 0);
-    const peaks = (DIAG.strings || []).map(s=>Number(s.rmsPeak||0)).filter(v=>v>0);
-    peaks.sort((a,b)=>a-b);
-    const P = peaks.length ? peaks[Math.floor(peaks.length/2)] : (N + 0.012);
-    const th = computeGameThresholds(N, P);
-
-    const obj = {
-      ts: Date.now(),
-      noiseRms: th.noise,
-      pluckPeak: th.pluck,
-      pluckHighRms: th.high,
-      pluckRiseRms: th.rise,
-      source: 'tuning'
-    };
-    safeSetLS(KEY_GAME_THRESH, JSON.stringify(obj));
-  }catch(e){
-    // ignore
-  }
 }
 
 let DIAG = null;
@@ -921,7 +877,6 @@ function markAsDone(idx) {
   } else {
     document.getElementById('guide-msg').innerText = "ぜんぶ できたね！";
     document.getElementById('nav-text').innerText = "";
-    saveGameThresholdsFromTuning();
     setTimeout(doDiagnosis, 800);
   }
 }
@@ -1609,8 +1564,17 @@ function doDiagnosis() {
 
   btn.addEventListener('click', showResult);
 }
-window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-window.onresize(); draw();
+function __applyViewportSize(){
+  // iOS Safari対策: 100vhのズレをJSで補正
+  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+__applyViewportSize();
+window.addEventListener('resize', __applyViewportSize);
+window.addEventListener('orientationchange', () => setTimeout(__applyViewportSize, 200));
+
+__applyViewportSize(); draw();
 
 // ===== FINAL FACE OVERRIDE (text-based, no emoji prefix) =====
 (function(){
@@ -1641,6 +1605,6 @@ window.onresize(); draw();
 
 </script>
 
-<div class="verBadge">v_release_20260118_tuning</div>
+<div id="version-badge">tuning_layout_fix_v1</div>
 </body>
 </html>
