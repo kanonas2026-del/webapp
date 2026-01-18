@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#88cfd3" />
+  <title>ウクレレ！</title>
+  <style>
+    :root{
+      --vh: 100vh;
+      --vvTop: 0px;
+      --vvLeft: 0px;
+
+      --bgTop: rgba(168,230,207,0.45);
+      --bgMid: rgba(122,177,204,0.22);
+      --bgBottom: rgba(255,255,255,0.92);
+      --text: #4a3728;
+      --card: rgba(255,255,255,0.92);
+      --shadow: rgba(0,0,0,0.18);
+      --primary: #ff7a3d;
+      --mint: #a8e6cf;
+      --sky: #7ab1cc;
+      --aqua: #5ce1e6;
+    }
+
+    /* 基本設定：tuning.htmlに合わせて完全固定 */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;          /* スクロール禁止 */
+      position: fixed;           /* 画面固定 */
+      background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      touch-action: none;        /* ブラウザのデフォルト動作禁止 */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* iOSのSafari対策 */
+    @supports (height: 100dvh) {
+      body { height: 100dvh; }
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    canvas { display:block; width:100%; height:100%; touch-action:none; }
+
+    /* --- UI Components --- */
+
+    #menu-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.32);
+      display: flex; align-items: center; justify-content: center; /* 上下中央寄せ */
+      padding: max(12px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom));
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+    .menu-card {
+      background: var(--card);
+      max-height: calc(100% - 24px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      color: var(--text);
+      width: min(560px, 96vw);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 0 rgba(122,177,204,0.35), 0 18px 36px var(--shadow);
+      border: 2px solid rgba(255,255,255,0.65);
+      display: flex; flex-direction: column;
+    }
+    .menu-card h1 { margin: 0 0 10px; font-size: 24px; text-align: center; }
+    .menu-list { display:flex; flex-direction:column; gap:10px; flex:0 0 auto; overflow:visible; padding:4px; }
+
+    .menu-btn {
+      appearance: none; border: none;
+      background: rgba(255,255,255,0.98);
+      color: var(--text);
+      width: 100%;
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex; gap: 12px; align-items: center;
+      box-shadow: 0 4px 0 rgba(122,177,204,0.32);
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      text-decoration: none;
+    }
+    .menu-btn:active { transform: translateY(2px); box-shadow: none; }
+    
+    .badge {
+      flex: 0 0 38px; height: 38px;
+      border-radius: 12px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #fff;
+    }
+    .menu-btn.mode2 .badge{ background: #ffde59; color:#4a3728; }
+    .menu-btn.mode3 .badge{ background: #7ed957; }
+    .menu-btn.mode4 .badge{ background: var(--aqua); color: #133; }
+    
+    .menu-text { text-align: left; flex: 1; }
+    .menu-text .title { font-size: 17px; font-weight: 900; line-height: 1.2; margin-bottom: 3px; }
+    .menu-text small { font-size: 12px; font-weight: 600; opacity: 0.8; display: block; line-height: 1.3; }
+
+    /* モード選択 */
+    .mode-select { margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.1); }
+    .mode-select-title { font-size: 12px; font-weight: 900; color: rgba(0,0,0,0.5); text-align: center; margin-bottom: 6px; }
+    .mode-pills { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .mode-pill {
+      border: 2px solid rgba(0,0,0,0.1);
+      background: #fff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mode-pill.active {
+      border-color: var(--primary);
+      background: rgba(255,122,61,0.1);
+      color: var(--primary);
+    }
+
+    /* ゲーム内 UI */
+    #lyrics-area {
+      position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+      width: 90%; text-align: center;
+      font-size: 28px; font-weight: 900; color: var(--text);
+      text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+      pointer-events: none; z-index: 50;
+    }
+
+    #score-panel, #timer-panel {
+      position: fixed; z-index: 90;
+      background: rgba(255,255,255,0.85);
+      padding: 6px 12px; border-radius: 14px;
+      font-weight: 900; font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: none;
+    }
+    #score-panel {
+      top: calc(54px + env(safe-area-inset-top));
+      right: calc(12px + env(safe-area-inset-right));
+      left: auto;
+      font-size: 18px;
+    }
+    #timer-panel { top: calc(12px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); font-size: 16px; }
+
+    #stopBtn {
+      position: fixed;
+      right: calc(14px + env(safe-area-inset-right));
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      z-index: 180; display: none;
+      border: none; border-radius: 16px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.92);
+      color: var(--text); font-weight: 900; font-size: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    #stopBtn:active { transform: scale(0.95); }
+
+    #back-btn {
+      position: fixed;
+      top: calc(58px + env(safe-area-inset-top));
+      left: calc(12px + env(safe-area-inset-left));
+      z-index: 80; display: none;
+    }
+    #back-btn a {
+      text-decoration: none; color: #0d2b3b; font-weight: 800; font-size: 12px;
+      background: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 10px;
+    }
+
+    #chordHud {
+      position: fixed;
+      top: calc(60px + env(safe-area-inset-top));
+      left: 50%; transform: translateX(-50%);
+      z-index: 85; display: none; pointer-events: none;
+      background: rgba(255,255,255,0.86);
+      border-radius: 18px; padding: 6px 16px;
+      font-weight: 900; font-size: 32px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Pause / Result Overlay */
+    #pause-overlay, #result-overlay, #loading-overlay {
+      position: fixed; inset: 0;
+      display: none; align-items: center; justify-content: center;
+      z-index: 120;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+    }
+    .pause-card, .result-card, .loading-card {
+      background: #fff; width: min(480px, 90vw);
+      border-radius: 20px; padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .result-card { border: 4px solid #fff; outline: 3px solid rgba(255,122,61,0.3); }
+    
+    .pause-title { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+    .pause-sub { font-size: 14px; opacity: 0.8; margin-bottom: 20px; }
+    
+    .result-title {
+      font-size: 48px; font-weight: 900;
+      background: linear-gradient(90deg, #ff7a3d, #ff5757, #7ed957, #5ce1e6);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      margin-bottom: 4px;
+    }
+    .result-score { font-size: 32px; font-weight: 900; margin: 10px 0; }
+    .result-msg { font-size: 16px; font-weight: 700; opacity: 0.8; margin-bottom: 20px; }
+
+    .action-btn {
+      width: 100%; border: none; border-radius: 14px;
+      padding: 14px; font-size: 16px; font-weight: 900;
+      cursor: pointer; margin-bottom: 10px;
+      transition: transform 0.1s;
+    }
+    .action-btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 8px 16px rgba(255,122,61,0.3); }
+    .btn-secondary { background: #eee; color: #555; }
+    
+    .result-actions { display: flex; gap: 10px; }
+    .result-actions .action-btn { margin-bottom: 0; }
+
+    /* iPhone 横向き対応 */
+    @media (orientation: landscape) and (max-height: 460px) {
+      #menu-overlay{ padding: max(8px, env(safe-area-inset-top)) 12px max(8px, env(safe-area-inset-bottom)); }
+      .menu-card{ max-height: none; overflow: visible; padding: 12px; border-radius: 16px; }
+      .menu-card h1{ font-size: 16px; margin-bottom: 6px; }
+      .menu-list{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 2px; }
+      .menu-btn{ padding: 10px; border-radius: 14px; gap: 10px; }
+      .badge{ flex: 0 0 32px; height: 32px; font-size: 18px; }
+      .menu-text .title{ font-size: 14px; margin-bottom: 2px; }
+      .menu-text small{ font-size: 10px; }
+      .mode-select{ margin-top: 10px; padding-top: 8px; }
+      .mode-pill{ padding: 5px 10px; font-size: 11px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="menu-overlay">
+    <div class="menu-card">
+      <h1>🪕 リズムにあわせてひいてみよう</h1>
+      
+      <div class="menu-list">
+        <button class="menu-btn mode1" onclick="prepGame('scale')">
+          <div class="badge">🐤</div>
+          <div class="menu-text">
+            <div class="title">ドレミファソラシド</div>
+            <small>だんだん速くなるよ（指のたいそう）</small>
+          </div>
+        </button>
+
+        <button class="menu-btn mode2" onclick="prepGame('easy')">
+          <div class="badge">🐱</div>
+          <div class="menu-text">
+            <div class="title">コード かんたん</div>
+            <small>C / F / G7 / Am のくりかえし</small>
+          </div>
+        </button>
+
+        <button class="menu-btn mode3" onclick="prepGame('hard')">
+          <div class="badge">🐼</div>
+          <div class="menu-text">
+            <div class="title">コード ちょいむず</div>
+            <small>いろんなコードが出てくるよ</small>
+          </div>
+        </button>
+
+        <button class="menu-btn mode4" onclick="prepGame('song')">
+          <div class="badge">🦁</div>
+          <div class="menu-text">
+            <div class="title">曲：きらきら星</div>
+            <small>メロディとコードを一緒にひこう</small>
+          </div>
+        </button>
+      </div>
+
+      <div class="mode-select">
+        <div class="mode-select-title">モード設定</div>
+        <div class="mode-pills">
+          <button class="mode-pill" type="button" data-mode="NORMAL">ノーマル</button>
+          <button class="mode-pill active" type="button" data-mode="WAIT">まちモード</button>
+          <button class="mode-pill" type="button" data-mode="TAP">タップモード</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lyrics-area"></div>
+  <div id="score-panel">⭐ <span id="score">0</span></div>
+  <div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
+  <div id="chordHud" aria-hidden="true"></div>
+  
+  <div id="back-btn"><a href="#" onclick="goMenu()">🏝️ メニュー</a></div>
+  <button id="stopBtn" type="button">ストップ</button>
+
+  <div id="pause-overlay" aria-hidden="true">
+    <div class="pause-card">
+      <div class="pause-title">ストップ中</div>
+      <div class="pause-sub">ちょっと ひとやすみ</div>
+      <button class="action-btn btn-primary" type="button" onclick="resumeGame()">つづける</button>
+      <button class="action-btn btn-secondary" type="button" onclick="goMenuFromPause()">メニューへ</button>
+    </div>
+  </div>
+
+  <div id="result-overlay" aria-hidden="true">
+    <div class="result-card">
+      <div class="result-title" id="result-title">Finish!</div>
+      <div class="result-score">⭐ <span id="result-score">0</span> pts</div>
+      <div class="result-msg" id="result-msg">Good Job!</div>
+      <div class="result-actions">
+        <button class="action-btn btn-primary" type="button" onclick="restartLast()">もう１回</button>
+        <button class="action-btn btn-secondary" type="button" onclick="goMenu()">メニュー</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading-overlay" aria-hidden="true">
+    <div class="loading-card">
+      <div class="pause-title">マイクじゅんび中...</div>
+      <div class="pause-sub" id="loading-msg">静かにしてね（ノイズをはかっています）</div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+  <input id="scoreFile" type="file" accept="application/json,.json" style="display:none" />
+</div>
+
+<script>
+// --- 基本設定と定数 ---
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const IS_MOBILE = IS_IOS || /Android/.test(navigator.userAgent);
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const lyricsEl = document.getElementById('lyrics-area');
+const timerPanel = document.getElementById('timer-panel');
+const timerEl = document.getElementById('timer');
+const chordHUDEl = document.getElementById('chordHud');
+const stopBtnEl = document.getElementById('stopBtn');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingMsg = document.getElementById('loading-msg');
+
+let gameState = 'MENU';
+let playModeSelected = 'WAIT';
+let playModeActive   = 'WAIT';
+
+// マイク感度・判定関連（tuning.htmlより移植）
+let audioCtx = null;
+let micStream = null;
+let micAnalyser = null;
+let micGain = null;
+let NOISE_RMS = 0;
+let PLUCK_HIGH_RMS = 0.012; 
+let PLUCK_RISE_RMS = 0.010;
+let prevRms = 0;
+let pluckHoldCount = 0;
+let ignorePluckUntil = 0;
+
+// ゲーム変数
+let rafId = 0;
+let gameEndAt = 0;
+const GAME_DURATION_MS = 60 * 1000;
+let score = 0; 
+let combo = 0; 
+let groups = []; 
+let pops = [];
+let flashes = [];
+let toasts = []; 
+let stars = [];
+let lastSpawn = 0; 
+let titleOpacity = 0;
+let scrollSpeed = 3.5;
+let baseScrollSpeed = 3.5;
+let gameMode = 'practice';
+let waitHold = false; // まちモード停止中フラグ
+let waitTargetGroup = null;
+
+const NUT_X = 180;
+const MARK_CX = 125;
+const MARK_R = 24;
+const HIT_WINDOW = 110;
+const PERFECT_WINDOW = 50;
+const SUPPORT_AHEAD = 620;
+const SUPPORT_PAST = 220;
+const STRING_LABELS = ['1A','2E','3C','4G'];
+const STRING_COLORS = ['#ff5757', '#ffde59', '#7ed957', '#5ce1e6'];
+
+// 譜面データ
+const CHORD_LIB = {
+  'C':  { name: 'C',  targetIdx: 0, fingers: [{s: 1, f: 3, txt: '薬'}] },
+  'F':  { name: 'F',  targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}, {s: 4, f: 2, txt: '中'}] },
+  'G7': { name: 'G7', targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}, {s: 1, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}] },
+  'Am': { name: 'Am', targetIdx: 0, fingers: [{s: 3, f: 2, txt: '中'}] },
+  'G':  { name: 'G',  targetIdx: 0, fingers: [{s: 3, f: 2, txt: '人'}, {s: 2, f: 3, txt: '薬'}, {s: 1, f: 2, txt: '中'}] },
+  'A7': { name: 'A7', targetIdx: 0, fingers: [{s: 3, f: 1, txt: '人'}] },
+  'Dm': { name: 'Dm', targetIdx: 0, fingers: [{s: 4, f: 2, txt: '中'}, {s: 3, f: 1, txt: '人'}, {s: 2, f: 1, txt: '人'}] },
+  'Em': { name: 'Em', targetIdx: 0, fingers: [{s: 3, f: 4, txt: '小'}, {s: 2, f: 3, txt: '薬'}, {s: 1, f: 2, txt: '中'}] },
+  'D7': { name: 'D7', targetIdx: 0, fingers: [{s: 2, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}, {s: 4, f: 2, txt: '人'}] }
+};
+const SOLO_LIB = {
+  'do':  { name: '', targetIdx: 0, fingers: [{s: 3, f: 0, txt: '0'}] },
+  're':  { name: '', targetIdx: 0, fingers: [{s: 3, f: 2, txt: '中'}] },
+  'mi':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 0, txt: '0'}] },
+  'fa':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 1, txt: '人'}] },
+  'so':  { name: '', targetIdx: 0, fingers: [{s: 2, f: 3, txt: '薬'}] },
+  'la':  { name: '', targetIdx: 0, fingers: [{s: 1, f: 0, txt: '0'}] },
+  'si':  { name: '', targetIdx: 0, fingers: [{s: 1, f: 2, txt: '中'}] },
+  'do2': { name: '', targetIdx: 0, fingers: [{s: 1, f: 3, txt: '薬'}] }
+};
+const SONG_DATA = [
+  { lib: CHORD_LIB, key: 'C', lyrics: "きら" }, { lib: SOLO_LIB, key: 'do', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "きら" }, { lib: SOLO_LIB, key: 'so', lyrics: "" },
+  { lib: CHORD_LIB, key: 'F', lyrics: "ひか" }, { lib: SOLO_LIB, key: 'la', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "るー" }, { lib: SOLO_LIB, key: 'so', lyrics: "" },
+  { lib: CHORD_LIB, key: 'G7', lyrics: "おそ" }, { lib: SOLO_LIB, key: 'fa', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "らの" }, { lib: SOLO_LIB, key: 'mi', lyrics: "" },
+  { lib: CHORD_LIB, key: 'G7', lyrics: "ほし" }, { lib: SOLO_LIB, key: 're', lyrics: "" },
+  { lib: CHORD_LIB, key: 'C', lyrics: "よー" }, { lib: SOLO_LIB, key: 'do', lyrics: "" }
+];
+
+let songIndex = 0;
+let practiceIndex = 0;
+let scaleIndex = 0;
+let isSongMode = false;
+let currentLevelChords = [];
+let spawnInterval = 1800;
+let lastStart = null;
+
+// --- イベントリスナー ---
+stopBtnEl.addEventListener('click', () => { if (gameState === 'PLAY') pauseGame(); });
+
+document.querySelectorAll('.mode-pill').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    setPlayMode(btn.dataset.mode || 'WAIT');
+  });
+});
+setPlayMode(playModeSelected);
+
+function setPlayMode(mode){
+  playModeSelected = mode;
+  document.querySelectorAll('.mode-pill').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+}
+
+// --- ゲーム開始前の準備フロー（マイク許可・キャリブレーション） ---
+async function prepGame(type) {
+  playModeActive = playModeSelected;
+  
+  // TAPモードならマイク不要なので即スタート
+  if (playModeActive === 'TAP') {
+    startGameByType(type);
+    return;
+  }
+
+  // マイク初期化・キャリブレーション
+  loadingOverlay.style.display = 'flex';
+  loadingMsg.innerText = "マイクをじゅんびしています...";
+
+  try {
+    // AudioContext作成（ユーザー操作直後なので許可される）
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+
+    // ストリーム取得
+    if (!micStream) {
+      const audioOpts = IS_IOS 
+        ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+        : true;
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: audioOpts });
+      
+      const source = audioCtx.createMediaStreamSource(micStream);
+      micAnalyser = audioCtx.createAnalyser();
+      micGain = audioCtx.createGain();
+      // tuning.htmlに合わせたゲイン設定
+      micGain.gain.value = (IS_IOS ? 3.9 : 1.0);
+      micAnalyser.fftSize = (IS_IOS ? 4096 : 2048);
+      
+      source.connect(micGain);
+      micGain.connect(micAnalyser);
+    }
+
+    // ノイズキャリブレーション (tuning.htmlのロジック移植)
+    loadingMsg.innerText = "静かにしてね（ノイズをはかっています）";
+    await calibrateNoise(1000); // 1秒計測
+
+    // 準備完了 -> ゲーム開始
+    loadingOverlay.style.display = 'none';
+    startGameByType(type);
+
+  } catch (err) {
+    loadingOverlay.style.display = 'none';
+    alert("マイクが使えません。設定を確認してください。\nとりあえずタップモードで始めます。");
+    playModeActive = 'TAP';
+    startGameByType(type);
+  }
+}
+
+// ノイズ測定（tuning.html移植）
+async function calibrateNoise(durationMs = 1000) {
+  const buffer = new Float32Array(micAnalyser.fftSize);
+  const samples = [];
+  const start = Date.now();
+
+  while (Date.now() - start < durationMs) {
+    micAnalyser.getFloatTimeDomainData(buffer);
+    let rms = 0;
+    for (let i = 0; i < buffer.length; i++) {
+      rms += buffer[i] * buffer[i];
+    }
+    samples.push(Math.sqrt(rms / buffer.length));
+    await new Promise(r => setTimeout(r, 50));
+  }
+
+  // 90パーセンタイルをノイズ床とする
+  samples.sort((a,b) => a-b);
+  const p90 = samples[Math.floor(samples.length * 0.90)] || 0;
+  NOISE_RMS = p90;
+
+  // 閾値設定（tuning.htmlのiOS/PC分岐を反映）
+  if (IS_IOS) {
+    const rise = p90 * 2.0;
+    const high = p90 * 3.0;
+    PLUCK_RISE_RMS = Math.min(0.0060, Math.max(0.0016, rise * 0.25));
+    PLUCK_HIGH_RMS = Math.min(0.0080, Math.max(0.0020, high * 0.25));
+  } else {
+    PLUCK_RISE_RMS = Math.max(0.010, p90 * 2.0);
+    PLUCK_HIGH_RMS = Math.max(0.012, p90 * 3.0);
+    if (IS_MOBILE) { // Androidなど
+      PLUCK_RISE_RMS *= 0.75;
+      PLUCK_HIGH_RMS *= 0.75;
+    }
+  }
+}
+
+function startGameByType(type) {
+  switch(type) {
+    case 'scale': initGame('scale', null, {speedBase: 3.4, interval: 2000, minInterval: 900, step: 120}); break;
+    case 'easy':  initGame('practice', ['C','F','G7','Am'], { speedBase: 3.2, order: 'cycle' }); break;
+    case 'hard':  initGame('practice', ['C','F','G7','Am','G','A7','Dm','Em','D7'], { speedBase: 3.35, order: 'cycle' }); break;
+    case 'song':  initGame('song', 'きらきら星', {speedBase: 3.45}); break;
+  }
+}
+
+// --- ゲーム初期化 ---
+function initGame(mode, levelData, options = {}) {
+  if (rafId) cancelAnimationFrame(rafId);
+  gameState = 'PLAY';
+
+  // 初期化
+  baseScrollSpeed = options.speedBase || 3.5;
+  scrollSpeed = baseScrollSpeed;
+  score = 0; combo = 0;
+  groups = []; pops = []; stars = []; flashes = []; toasts = [];
+  waitHold = false;
+  waitTargetGroup = null;
+  gameMode = mode;
+  isSongMode = (mode === 'song');
+  practiceIndex = 0; scaleIndex = 0; songIndex = 0;
+  lastStart = { mode, levelData, options };
+  lastSpawn = performance.now();
+
+  spawnInterval = (mode === 'scale') ? (options.interval||2000) : 1800;
+  currentLevelChords = Array.isArray(levelData) ? levelData : (levelData ? [levelData] : ['C']);
+
+  // UI切り替え
+  document.getElementById('menu-overlay').style.display = 'none';
+  document.getElementById('result-overlay').style.display = 'none';
+  document.getElementById('pause-overlay').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'block';
+  timerPanel.style.display = 'block';
+  stopBtnEl.style.display = 'block';
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('score').innerText = "0";
+  lyricsEl.innerText = "";
+  
+  gameEndAt = performance.now() + GAME_DURATION_MS;
+  timerEl.innerText = Math.ceil(GAME_DURATION_MS/1000);
+  titleOpacity = isSongMode ? 2.0 : 0.0;
+
+  // 感度検出用リセット
+  prevRms = NOISE_RMS;
+  pluckHoldCount = 0;
+  ignorePluckUntil = Date.now() + 500; // 開始直後の誤爆防止
+
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+// --- マイク入力処理（tuning.htmlの「弾いた」判定ロジック） ---
+function processMicInput() {
+  if (playModeActive === 'TAP' || !micAnalyser) return;
+
+  const buffer = new Float32Array(micAnalyser.fftSize);
+  micAnalyser.getFloatTimeDomainData(buffer);
+
+  // RMS計算
+  let rms = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    rms += buffer[i] * buffer[i];
+  }
+  const rmsVal = Math.sqrt(rms / buffer.length);
+
+  // 判定（tuning.htmlロジック）
+  const rise = rmsVal - prevRms;
+  const now = Date.now();
+  const canUpdate = now >= ignorePluckUntil;
+
+  // 「音量が閾値以上」かつ「急激に立ち上がった」場合のみ反応
+  const candidate = canUpdate && (rmsVal > PLUCK_HIGH_RMS) && (rise > PLUCK_RISE_RMS);
+
+  if (candidate) {
+    pluckHoldCount = Math.min(pluckHoldCount + 1, 6);
+  } else {
+    pluckHoldCount = Math.max(pluckHoldCount - 1, 0);
+  }
+
+  prevRms = rmsVal;
+
+  // 2フレーム連続で検出したら「弾いた」とみなす
+  if (pluckHoldCount >= 2) {
+    pluckHoldCount = 0;
+    ignorePluckUntil = now + 250; // 連打防止クールダウン
+    handleAction(); // ヒット処理へ
+  }
+}
+
+// --- ヒット判定・ゲーム進行 ---
+function handleAction() {
+  if (gameState !== 'PLAY') return;
+
+  // 一番近いターゲットを探す
+  let target = null;
+  let bestDist = Infinity;
+  
+  if (waitHold && playModeActive === 'WAIT' && waitTargetGroup && waitTargetGroup.active) {
+     target = waitTargetGroup;
+     bestDist = Math.abs(target.x - NUT_X);
+  } else {
+    for (let g of groups) {
+      if (!g.active) continue;
+      const dx = g.x - NUT_X;
+      if (dx > SUPPORT_AHEAD || dx < -SUPPORT_PAST) continue;
+      const d = Math.abs(dx);
+      if (d < bestDist) { bestDist = d; target = g; }
+    }
+  }
+
+  let hit = false;
+  let skipMiss = false;
+
+  if (target) {
+    // 判定幅（TAPモードは甘め）
+    const win = (playModeActive === 'TAP') ? HIT_WINDOW * 2.0 : HIT_WINDOW;
+    
+    if (bestDist < win) {
+      // HIT!
+      hit = true;
+      target.active = false;
+      
+      // まちモード解除
+      if (waitHold) {
+        waitHold = false;
+        scrollSpeed = (baseScrollSpeed > 0) ? baseScrollSpeed : 3.5;
+        waitTargetGroup = null;
+        lastSpawn = performance.now(); 
+        toasts.push(new ToastText("OK! Go!"));
+      }
+      
+      combo++;
+      if (combo % 5 === 0) { // 加速
+         flashes.push(new FlashText('SPEED UP!', canvas.width/2, canvas.height/2 - 80));
+         scrollSpeed = Math.min(10.0, scrollSpeed * 1.15);
+      }
+      
+      const isPerfect = (bestDist < PERFECT_WINDOW);
+      score += (isPerfect ? 15 : 10);
+      document.getElementById('score').innerText = score;
+      
+      pops.push(new PopText(isPerfect?"Perfect!":"Good!", canvas.width/2, canvas.height/2));
+      pops.push(new PopText(combo+" Chain!", canvas.width/2, canvas.height/2+60, true));
+      for(let i=0;i<15;i++) stars.push(new Star(NUT_X, canvas.height/2));
+
+    } else {
+      // MISS (近くにあるがタイミングが違う)
+      if (playModeActive === 'WAIT') {
+        if (!waitHold) {
+          waitHold = true;
+          scrollSpeed = 0;
+          waitTargetGroup = target;
+          target.x = NUT_X; // 強制吸着
+          combo = 0;
+          flashes.push(new FlashText('Wait!', canvas.width/2, canvas.height/2));
+          toasts.push(new ToastText('音を出して！'));
+        }
+        skipMiss = true;
+      }
+    }
+  }
+
+  if (!hit && !skipMiss) {
+    if (combo > 0) {
+      combo = 0;
+      scrollSpeed = Math.max(2.6, scrollSpeed * 0.9);
+      toasts.push(new ToastText("Speed Down..."));
+    }
+  }
+}
+
+// --- 描画ループ ---
+let lastFrameT = 0;
+function gameLoop(time) {
+  if (gameState !== 'PLAY') return;
+  if (!lastFrameT) lastFrameT = time;
+  lastFrameT = time;
+  
+  // タイマー
+  if (!waitHold) {
+     const remain = Math.max(0, gameEndAt - performance.now());
+     timerEl.innerText = Math.ceil(remain/1000);
+     if (remain <= 0) { endGame(); return; }
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawFretboard();
+
+  // スポーンロジック
+  if (!waitHold && (time - lastSpawn > spawnInterval)) {
+    // 画面が詰まりすぎないようにチェック
+    let activeCount = 0;
+    let maxX = -9999;
+    for (let g of groups) {
+      if(g.active) {
+        activeCount++;
+        if(g.x > maxX) maxX = g.x;
+      }
+    }
+    const spawnPos = canvas.width + 120;
+    // 最低でも260pxは空ける
+    if (activeCount < 6 && (maxX < spawnPos - 260)) {
+      if (isSongMode) {
+        const data = SONG_DATA[songIndex % SONG_DATA.length];
+        groups.push(new ChordGroup(data.lib[data.key], data.lyrics));
+        songIndex++;
+      } else if (gameMode === 'scale') {
+        const k = ['do','re','mi','fa','so','la','si','do2'][scaleIndex % 8];
+        groups.push(new ChordGroup(SOLO_LIB[k], ""));
+        scaleIndex++;
+        if (scaleIndex % 8 === 0) spawnInterval = Math.max(900, spawnInterval - 120);
+      } else {
+        const key = currentLevelChords[practiceIndex % currentLevelChords.length];
+        practiceIndex++;
+        groups.push(new ChordGroup(CHORD_LIB[key], ""));
+      }
+      lastSpawn = time;
+    }
+  }
+
+  // HUD更新
+  updateHUD();
+
+  // オブジェクト更新・描画
+  // groups
+  for (let i = groups.length - 1; i >= 0; i--) {
+    const g = groups[i];
+    g.update();
+    g.draw(); // HUDでターゲット判定するのでdraw内では簡易処理
+    if (g.x < -300) groups.splice(i, 1);
+  }
+  
+  // particles
+  stars.forEach(s => { s.update(); s.draw(); }); stars = stars.filter(s => s.life > 0);
+  pops.forEach(p => { p.update(); p.draw(); }); pops = pops.filter(p => p.life > 0);
+  flashes.forEach(f => { f.update(); f.draw(); }); flashes = flashes.filter(f => f.life > 0);
+  toasts.forEach(t => { t.update(); t.draw(); }); toasts = toasts.filter(t => t.life > 0);
+
+  // マイク入力判定（毎フレーム実行）
+  processMicInput();
+
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+// --- 描画・クラス定義 ---
+
+function drawFretboard() {
+  const midY = canvas.height / 2;
+  const fw = (canvas.width - NUT_X - 60) / 12;
+  ctx.fillStyle = "#6d4c41"; ctx.fillRect(NUT_X, midY - 150, canvas.width, 300);
+  for (let i = 0; i <= 12; i++) {
+    const x = NUT_X + i * fw;
+    ctx.strokeStyle = (i === 0) ? "#eee" : "#a1887f"; 
+    ctx.lineWidth = (i === 0) ? 10 : 3;
+    ctx.beginPath(); ctx.moveTo(x, midY - 150); ctx.lineTo(x, midY + 150); ctx.stroke();
+  }
+  for (let i = 0; i < 4; i++) {
+    const y = midY + (i - 1.5) * 75;
+    ctx.beginPath(); ctx.fillStyle = STRING_COLORS[i]; ctx.arc(MARK_CX, y, MARK_R, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(STRING_LABELS[i], MARK_CX, y);
+    ctx.strokeStyle = STRING_COLORS[i]; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(NUT_X, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+}
+
+function updateHUD() {
+  let target = null;
+  let bestDist = Infinity;
+  let targetIdx = -1;
+
+  for(let i=0; i<groups.length; i++){
+    const g = groups[i];
+    if(!g.active) continue;
+    const d = Math.abs(g.x - NUT_X);
+    if(d < bestDist && d < SUPPORT_AHEAD + 100) { bestDist = d; target = g; targetIdx = i; }
+  }
+
+  // Draw target highlight inside objects loop actually
+  // ここではHUDテキストのみ更新
+  if (target && gameMode !== 'scale') {
+    chordHUDEl.style.display = 'block';
+    chordHUDEl.innerText = target.chord.name || "";
+  } else {
+    chordHUDEl.style.display = 'none';
+  }
+  
+  // Draw guide effect specifically for the target
+  if (target) target.isTarget = true;
+}
+
+class ChordGroup {
+  constructor(chordData, lyrics="") {
+    this.chord = chordData; this.lyrics = lyrics;
+    this.x = canvas.width + 120; this.active = true; this.ticked = false;
+    this.isTarget = false;
+  }
+  update() {
+    this.x -= scrollSpeed;
+    if (!this.ticked && this.x <= NUT_X) {
+      if (this.lyrics) lyricsEl.innerText = this.lyrics;
+      this.ticked = true;
+    }
+  }
+  draw() {
+    const centerY = canvas.height / 2;
+    const fw = (canvas.width - NUT_X - 60) / 12;
+
+    if (this.active) {
+      // Guide logic (moved from main loop for cleanliness)
+      if (this.isTarget) {
+        const dx = Math.abs(this.x - NUT_X);
+        if (dx < SUPPORT_AHEAD) {
+          const t = Math.max(0, 1 - (dx/SUPPORT_AHEAD));
+          const alpha = 0.2 + t * 0.6;
+          this.chord.fingers.forEach(f => {
+            const fx = (f.f===0) ? NUT_X : NUT_X + (f.f*fw) - (fw/2);
+            const fy = centerY + (f.s - 2.5) * 75;
+            this.drawCircle(fx, fy, (f.f===0?'0':f.txt), 32+t*10, alpha, true);
+          });
+        }
+        this.isTarget = false; // reset for next frame
+      }
+
+      // Main Note
+      const tf = this.chord.fingers[this.chord.targetIdx];
+      const nameX = (tf.f===0) ? this.x : this.x + (tf.f*fw) - (fw/2);
+      
+      if (gameMode === 'scale') {
+        ctx.fillStyle = "#fff"; ctx.font = "bold 50px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText(this.chord.name || "", nameX, centerY - 180);
+      }
+
+      const isWaitTarget = (waitHold && waitTargetGroup === this);
+      const blink = isWaitTarget ? (0.5 + 0.5*Math.sin(performance.now()/100)) : 1.0;
+
+      this.chord.fingers.forEach(f => {
+        const fx = (f.f===0) ? this.x : this.x + (f.f * fw) - (fw/2);
+        const fy = centerY + (f.s - 2.5) * 75;
+        this.drawCircle(fx, fy, (f.f===0?'0':f.txt), isWaitTarget?46:40, 1.0, false, blink);
+      });
+    }
+  }
+  drawCircle(x, y, txt, size, alpha, blur, scale=1.0) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (blur) ctx.filter = "blur(2px)";
+    ctx.translate(x, y); ctx.scale(scale, scale);
+    ctx.beginPath(); ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fillStyle = (txt==='薬')?'#5271ff':(txt==='中'?'#ff66c4':(txt==='人'?'#ff914d':'#888'));
+    ctx.fill(); 
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.stroke();
+    ctx.filter = "none"; ctx.fillStyle = "#fff"; 
+    ctx.font = `bold ${size*0.75}px sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(txt, 0, 2);
+    ctx.restore();
+  }
+}
+
+// 簡易エフェクトクラス
+class FlashText { constructor(t,x,y){this.t=t;this.x=x;this.y=y;this.life=1;this.s=0;} update(){this.s++;this.life-=0.02;} draw(){ctx.save();ctx.globalAlpha=Math.max(0,this.life);ctx.font="900 80px sans-serif";ctx.textAlign="center";ctx.strokeText(this.t,this.x,this.y);ctx.fillStyle="#ff7a3d";ctx.fillText(this.t,this.x,this.y);ctx.restore();} }
+class ToastText { constructor(t){this.t=t;this.life=1;} update(){this.life-=0.02;} draw(){ctx.save();ctx.globalAlpha=this.life;ctx.font="900 20px sans-serif";ctx.textAlign="center";ctx.fillText(this.t,canvas.width/2,150);ctx.restore();} }
+class Star { constructor(x,y){this.x=x;this.y=y;this.vx=(Math.random()-.5)*20;this.vy=(Math.random()-.5)*20;this.life=1;} update(){this.x+=this.vx;this.y+=this.vy;this.vy+=0.5;this.life-=0.03;} draw(){ctx.save();ctx.globalAlpha=this.life;ctx.fillStyle="#ffeb3b";ctx.beginPath();ctx.arc(this.x,this.y,8,0,Math.PI*2);ctx.fill();ctx.restore();} }
+class PopText { constructor(t,x,y,c){this.t=t;this.x=x;this.y=y;this.life=1;this.c=c;} update(){this.y-=2;this.life-=0.02;} draw(){ctx.save();ctx.globalAlpha=this.life;ctx.font=this.c?"bold 50px sans-serif":"italic 900 80px sans-serif";ctx.textAlign="center";ctx.strokeText(this.t,this.x,this.y);ctx.fillStyle=this.c?"#ffde59":"#ff66c4";ctx.fillText(this.t,this.x,this.y);ctx.restore();} }
+
+// --- 画面遷移関数 ---
+function stopGame(reason) {
+  gameState = 'MENU';
+  if (rafId) cancelAnimationFrame(rafId);
+  document.getElementById('menu-overlay').style.display = 'flex';
+  document.getElementById('pause-overlay').style.display = 'none';
+  document.getElementById('result-overlay').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'none';
+  timerPanel.style.display = 'none';
+  stopBtnEl.style.display = 'none';
+  // マイクは停止しない（再開をスムーズにするため）だが、音解析はゲームループ停止で止まる
+}
+function pauseGame(){ gameState = 'PAUSE'; cancelAnimationFrame(rafId); document.getElementById('pause-overlay').style.display = 'flex'; }
+function resumeGame(){ gameState = 'PLAY'; document.getElementById('pause-overlay').style.display = 'none'; lastFrameT = 0; rafId = requestAnimationFrame(gameLoop); }
+function goMenu(){ stopGame('MENU'); }
+function goMenuFromPause(){ stopGame('MENU'); }
+function restartLast(){ if(lastStart) prepGame(lastStart.options.modeType || 'easy'); /* 簡易再開 */ else goMenu(); }
+// prepGame引数の互換性のため簡易実装。本来はlastStart情報をフル活用すべきだが、今回はprepGame経由で再初期化を推奨
+
+function endGame(){
+  gameState = 'RESULT';
+  cancelAnimationFrame(rafId);
+  document.getElementById('result-score').innerText = score;
+  document.getElementById('result-overlay').style.display = 'flex';
+  document.getElementById('result-msg').innerText = (score > 300) ? "Amazing!!" : "Good Job!";
+}
+
+// --- リサイズ・初期設定 ---
+function handleResize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', handleResize);
+handleResize();
+
+// タッチ操作（タップモード用 + UI操作）
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault(); 
+  if(gameState === 'PLAY' && playModeActive === 'TAP') handleAction();
+}, {passive: false});
+
+canvas.addEventListener('mousedown', (e) => {
+  if(gameState === 'PLAY' && playModeActive === 'TAP') handleAction();
+});
+
+// 初期ロード時
+window.onload = function(){ window.scrollTo(0,0); };
+
+</script>
+</body>
+</html>
