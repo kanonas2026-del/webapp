@@ -2,35 +2,29 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ウクレレであそぼう</title>
-<style>:root{ --vh: 1vh; }
+<style>
+  :root{ --vh: 1vh; }
 
   html, body {
   margin: 0; padding: 0;
   width: 100%;
-  /* iPhone Safari UIバー対策: 100vhを避け、dvh/--vhを使う */
+  /* iPhone/iPad SafariのUIバー出入りで崩れない高さ（visualViewport基準） */
   height: 100dvh;
   height: calc(var(--vh) * 100);
-  /* 1pxだけスクロール余地を作って、UIバーの自動収納を誘発 */
-  overflow-x: hidden;
-  overflow-y: auto;
-  position: relative;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
   background: #f4f9ff;
   font-family: "Hiragino Sans", "Arial", sans-serif;
-  touch-action: manipulation;
-  -webkit-text-size-adjust: 100%;
-  overscroll-behavior: none;
+  touch-action: none;
 }
-body {
-  display: flex; justify-content: center; align-items: center;
-  min-height: calc(100dvh + 1px);
-  min-height: calc((var(--vh) * 100) + 1px);
-}
+body { display: flex; justify-content: center; align-items: center; }
 
   /* タイトル */
   .title {
-    position: fixed; top: 6vh; right: 6vw;
+    position: fixed; top: calc(env(safe-area-inset-top) + (var(--vh) * 6)); right: 6vw;
     font-size: clamp(24px, 6vw, 34px);
     font-weight: 600; letter-spacing: 0.08em;
     color: #333; z-index: 10; user-select: none;
@@ -73,8 +67,8 @@ body {
 <div class="title">ウクレレであそぼう</div>
 
 <div class="menu">
-  <button id="btn-start" class="primary" onclick="__go('game.html')">▶ はじめる</button>
-  <button id="btn-tuning" onclick="__go('tuning.html')">🎵 チューニング</button>
+  <button id="btn-start" class="primary" onclick="location.href='game.html'">▶ はじめる</button>
+  <button id="btn-tuning" onclick="location.href='tuning.html'">🎵 チューニング</button>
   <button id="btn-help" onclick="alert('音に合わせて画面をタップしたり、実際にウクレレを弾いて遊ぶゲームです！')">？ つかいかた</button>
 </div>
 
@@ -105,19 +99,8 @@ body {
 </svg>
 </div>
 
-
-<!-- 1px spacer: SafariのUIバー収納を誘発するための“スクロール余地” -->
-<div id="uiHideSpacer" style="height:1px;width:1px;opacity:0;"></div>
-
-<div style="position:fixed;right:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
-index_uihide_try_v1
-</div>
-
 <script>
 (function(){
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isStandalone = () => (window.navigator.standalone === true) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-
   function setVh(){
     const vv = window.visualViewport;
     const h = vv ? vv.height : (document.documentElement.clientHeight || window.innerHeight);
@@ -126,46 +109,12 @@ index_uihide_try_v1
   setVh();
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize', setVh);
+    window.visualViewport.addEventListener('scroll', setVh);
   }
   window.addEventListener('resize', setVh);
   window.addEventListener('orientationchange', () => setTimeout(setVh, 250));
-
-  function attemptHideBars(){
-    if(!isIOS) return;
-    if(isStandalone()) return;
-    // “ユーザー操作直後”に小さくスクロールしてUIバー収納を誘発（効かない端末もあります）
-    try{
-      const root = document.documentElement;
-      const prev = root.style.overflowY;
-      root.style.overflowY = 'auto';
-      // 何回か試す（横向きは成功率が落ちる）
-      window.scrollTo(0, 1);
-      setTimeout(() => window.scrollTo(0, 0), 60);
-      setTimeout(() => window.scrollTo(0, 2), 160);
-      setTimeout(() => window.scrollTo(0, 0), 220);
-      setTimeout(() => { root.style.overflowY = prev; }, 420);
-    }catch(e){}
-  }
-
-  // 初回タップで一度だけ試す（indexの見栄え改善用）
-  let armed = true;
-  function onFirst(){
-    if(!armed) return;
-    armed = false;
-    attemptHideBars();
-  }
-  document.addEventListener('touchstart', onFirst, {passive:true});
-  document.addEventListener('click', onFirst, {passive:true});
-
-  // 画面回転後はもう一度試せるようにする
-  window.addEventListener('orientationchange', () => { armed = true; });
-
-  // ボタン遷移は“試してから”移動
-  window.__go = function(url){
-    attemptHideBars();
-    setTimeout(() => { location.href = url; }, 140);
-  };
 })();
 </script>
+
 </body>
 </html>
