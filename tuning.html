@@ -9,6 +9,8 @@
     body { margin: 0; background: #4a3728; color: #fff; font-family: sans-serif; overflow: hidden; touch-action: none; }
 
     :root{
+      --vh: 1vh;
+
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
@@ -69,7 +71,7 @@
       padding: clamp(16px, 4.8vw, 25px) clamp(28px, 7vw, 50px);
     }
     #diagnosis-card{
-      max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 40px);
+      max-height: calc((var(--vh) * 100) - var(--safe-top) - var(--safe-bottom) - 40px);
       overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -80,7 +82,7 @@
       .ui-panel{ bottom: calc(var(--safe-bottom) + 10px); }
     }
 
-    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: 100vh; position: relative; }
+    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: 100dvh; height: calc(var(--vh) * 100); position: relative; }
     canvas { display: block; width: 100%; height: 100%; }
     #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .start-btn { background: #ff914d; color: white; border: none; padding: 25px 50px; font-size: 24px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 0 #d97b41; }
@@ -182,7 +184,7 @@
 
 
     /* ===== iPhone landscape fix (横画面でボタンがネックに被る対策) ===== */
-    @media (orientation: landscape) and (max-height: 520px){
+    @media (orientation: landscape){
       /* 上のガイドは1行に寄せて省スペース */
       #guide-msg{
         top: calc(var(--safe-top) + 6px);
@@ -1559,8 +1561,22 @@ function doDiagnosis() {
 
   btn.addEventListener('click', showResult);
 }
-window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-window.onresize(); draw();
+function applyViewportSize(){
+  const vv = window.visualViewport;
+  const h = vv ? vv.height : (document.documentElement.clientHeight || window.innerHeight);
+  const w = vv ? vv.width  : (document.documentElement.clientWidth  || window.innerWidth);
+  // expose CSS vh unit (for iPhone Safari 100vh issue)
+  document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
+  canvas.width = Math.floor(w);
+  canvas.height = Math.floor(h);
+}
+applyViewportSize();
+if (window.visualViewport){
+  window.visualViewport.addEventListener('resize', () => { applyViewportSize(); draw(); });
+}
+window.addEventListener('resize', () => { applyViewportSize(); draw(); });
+window.addEventListener('orientationchange', () => { setTimeout(() => { applyViewportSize(); draw(); }, 250); });
+draw();
 
 // ===== FINAL FACE OVERRIDE (text-based, no emoji prefix) =====
 (function(){
@@ -1590,5 +1606,9 @@ window.onresize(); draw();
 })();
 
 </script>
+
+<div style="position:fixed;right:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.9);color:#111;font-size:12px;font-weight:900;">
+tuning_fix_v1
+</div>
 </body>
 </html>
