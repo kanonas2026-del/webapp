@@ -239,7 +239,9 @@
 
     /* comboBig disabled (show combo only in FX) */
     #comboBig{ display:none !important; }
-  </style>
+  
+  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
+</style>
 </head>
 <body>
 
@@ -269,9 +271,9 @@
 
       <div class="mode-select">
         <div class="mode-pills">
-          <div class="mode-pill" onclick="setMode(this, 'NORMAL')">ノーマル</div>
-          <div class="mode-pill active" onclick="setMode(this, 'WAIT')">まちモード</div>
-          <div class="mode-pill" onclick="setMode(this, 'TAP')">タップモード</div>
+          <div class="mode-pill" data-mode="NORMAL" onclick="setMode(this, 'NORMAL')">ノーマル</div>
+          <div class="mode-pill active" data-mode="WAIT" onclick="setMode(this, 'WAIT')">まちモード</div>
+          <div class="mode-pill" data-mode="TAP" onclick="setMode(this, 'TAP')">タップモード</div>
         </div>
       </div>
       
@@ -333,6 +335,59 @@ let playMode = 'WAIT';
 let audioCtx = null;
 let micStream = null;
 let micAnalyser = null;
+
+// ---- チューニング結果（判定閾値）を読む ----
+const THRESH_KEY = 'uk_game_thresholds_v1';
+const THRESH_MAX_AGE_H = 24; // 24時間
+function loadGameThresholds(){
+  try{
+    const raw = localStorage.getItem(THRESH_KEY);
+    if(!raw) return null;
+    const o = JSON.parse(raw);
+    if(!o || typeof o !== 'object') return null;
+    if(!o.updatedAt) return null;
+    const ageH = (Date.now() - Number(o.updatedAt)) / 3600000;
+    if(!(ageH >= 0) || ageH > THRESH_MAX_AGE_H) return null;
+    return o;
+  }catch(e){ return null; }
+}
+async function measureNoiseRms(durationMs=900, stepMs=90){
+  if(!micAnalyser) return 0;
+  const buf = new Float32Array(micAnalyser.fftSize);
+  const samples = [];
+  const end = performance.now() + durationMs;
+  while(performance.now() < end){
+    micAnalyser.getFloatTimeDomainData(buf);
+    let s=0; for(let i=0;i<buf.length;i++) s += buf[i]*buf[i];
+    samples.push(Math.sqrt(s/buf.length));
+    await new Promise(r=>setTimeout(r, stepMs));
+  }
+  samples.sort((a,b)=>a-b);
+  const idx = Math.max(0, Math.min(samples.length-1, Math.floor(samples.length*0.85)));
+  return samples[idx] ?? (samples[samples.length-1] ?? 0);
+}
+function applyThresholdsFrom(noise, stored){
+  let rise = 0, high = 0;
+  if(stored && typeof stored.pluckRiseRms === 'number' && typeof stored.pluckHighRms === 'number'){
+    const baseNoise = (typeof stored.noiseRms==='number' && stored.noiseRms>0) ? stored.noiseRms : noise;
+    const k = baseNoise>0 ? (noise/baseNoise) : 1;
+    rise = stored.pluckRiseRms * k;
+    high = stored.pluckHighRms * k;
+  }
+  // 最低ライン（端末別）
+  if(IS_IOS){
+    rise = Math.max(rise||0, 0.0016, noise*2.0);
+    high = Math.max(high||0, 0.0020, noise*3.0);
+  } else {
+    rise = Math.max(rise||0, 0.010,  noise*2.0);
+    high = Math.max(high||0, 0.012,  noise*3.0);
+  }
+  if(high < noise*2.4) high = noise*2.4;
+  if(rise > high*0.9) rise = high*0.6;
+  PLUCK_RISE_RMS = rise;
+  PLUCK_HIGH_RMS = high;
+}
+
 let prevRms = 0;
 let pluckHoldCount = 0;
 let ignorePluckUntil = 0;
@@ -434,14 +489,14 @@ const CHORD_LIB = {
   'D7': { name: 'D7', targetIdx: 0, fingers: [{s: 2, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}, {s: 4, f: 2, txt: '人'}] }
 };
 const SOLO_LIB = {
-  'do':  { name:'', targetIdx:0, fingers:[{s:3,f:0,txt:'0'}]},
-  're':  { name:'', targetIdx:0, fingers:[{s:3,f:2,txt:'中'}]},
-  'mi':  { name:'', targetIdx:0, fingers:[{s:2,f:0,txt:'0'}]},
-  'fa':  { name:'', targetIdx:0, fingers:[{s:2,f:1,txt:'人'}]},
-  'so':  { name:'', targetIdx:0, fingers:[{s:2,f:3,txt:'薬'}]},
-  'la':  { name:'', targetIdx:0, fingers:[{s:1,f:0,txt:'0'}]},
-  'si':  { name:'', targetIdx:0, fingers:[{s:1,f:2,txt:'中'}]},
-  'do2': { name:'', targetIdx:0, fingers:[{s:1,f:3,txt:'薬'}]}
+  'do':  { name:'ド', targetIdx:0, fingers:[{s:3,f:0,txt:'0'}]},
+  're':  { name:'レ', targetIdx:0, fingers:[{s:3,f:2,txt:'中'}]},
+  'mi':  { name:'ミ', targetIdx:0, fingers:[{s:2,f:0,txt:'0'}]},
+  'fa':  { name:'ファ', targetIdx:0, fingers:[{s:2,f:1,txt:'人'}]},
+  'so':  { name:'ソ', targetIdx:0, fingers:[{s:2,f:3,txt:'薬'}]},
+  'la':  { name:'ラ', targetIdx:0, fingers:[{s:1,f:0,txt:'0'}]},
+  'si':  { name:'シ', targetIdx:0, fingers:[{s:1,f:2,txt:'中'}]},
+  'do2': { name:'ド', targetIdx:0, fingers:[{s:1,f:3,txt:'薬'}]}
 };
 const SONG_DATA = [
   {lib:CHORD_LIB,key:'C',lyrics:"きら"},{lib:SOLO_LIB,key:'do',lyrics:""},
@@ -462,9 +517,23 @@ let lastStartParams = null; // リトライ用
 // --- UI操作 ---
 function setMode(el, mode){
   playMode = mode;
-  document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.mode-pill').forEach(b => {
+    const m = b.getAttribute('data-mode') || '';
+    b.classList.toggle('active', m === mode);
+  });
 }
+
+// URLパラメータ mode=TAP/NORMAL/WAIT を反映
+(function applyModeFromQuery(){
+  try{
+    const p = new URLSearchParams(location.search);
+    const m = (p.get('mode')||'').toUpperCase();
+    if(m==='TAP' || m==='NORMAL' || m==='WAIT'){
+      setMode(null, m);
+    }
+  }catch(e){}
+})();
+
 
 // ★修正: メニューへ戻る動作（TOPではなくゲームメニューに戻る）
 function goMenu(){
@@ -522,23 +591,16 @@ async function prepGame(type){
       micAnalyser.fftSize = IS_IOS ? 4096 : 2048;
       src.connect(gain).connect(micAnalyser);
     }
-    
-    // ノイズ計測 (1秒)
-    await new Promise(r => setTimeout(r, 1000));
-    // 簡易キャリブレーション（現在値をノイズ床とする）
-    const buf = new Float32Array(micAnalyser.fftSize);
-    micAnalyser.getFloatTimeDomainData(buf);
-    let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
-    NOISE_RMS = Math.sqrt(rms/buf.length);
-    
-    // 閾値設定
-    if(IS_IOS){
-      PLUCK_RISE_RMS = Math.max(0.0016, NOISE_RMS * 2.0);
-      PLUCK_HIGH_RMS = Math.max(0.0020, NOISE_RMS * 3.0);
-    } else {
-      PLUCK_RISE_RMS = Math.max(0.010, NOISE_RMS * 2.0);
-      PLUCK_HIGH_RMS = Math.max(0.012, NOISE_RMS * 3.0);
-    }
+
+    // チューニング結果（あれば）
+    const stored = loadGameThresholds();
+
+    // ノイズ計測（約1秒）
+    await new Promise(r => setTimeout(r, 200)); // 立ち上がり待ち
+    NOISE_RMS = await measureNoiseRms(950, 95);
+
+    // 閾値：チューニング結果を基本に、今のノイズ床で補正
+    applyThresholdsFrom(NOISE_RMS, stored);
 
     document.getElementById('loading-overlay').style.display = 'none';
     startGameByType(type);
@@ -553,7 +615,7 @@ async function prepGame(type){
 
 function startGameByType(type){
   lastStartParams = type;
-  if(type==='scale') initGame('scale', null, {speedBase:3.4, interval:2000});
+  if(type==='scale') initGame('scale', null, {speedBase:3.4});
   else if(type==='easy') initGame('practice', ['C','F','G7','Am'], {speedBase:3.2});
   else if(type==='hard') initGame('practice', ['C','F','G7','Am','G','A7','Dm','Em','D7'], {speedBase:3.35});
   else if(type==='song') initGame('song', 'きらきら星', {speedBase:3.45});
@@ -893,5 +955,7 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 <div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
 game_iphone_fix_v11
 </div>
+
+<div class="verBadge">v_release_20260118_game</div>
 </body>
 </html>

@@ -8,19 +8,17 @@
   :root{ --vh: 1vh; }
 
   html, body {
-  margin: 0; padding: 0;
-  width: 100%;
-  /* iPhone/iPad SafariのUIバー出入りで崩れない高さ（visualViewport基準） */
-  height: 100dvh;
-  height: calc(var(--vh) * 100);
-  overflow: hidden;
-  position: fixed;
-  inset: 0;
-  background: #f4f9ff;
-  font-family: "Hiragino Sans", "Arial", sans-serif;
-  touch-action: none;
-}
-body { display: flex; justify-content: center; align-items: center; }
+    margin: 0; padding: 0;
+    width: 100%;
+    height: 100dvh;
+    height: calc(var(--vh) * 100);
+    overflow: hidden;
+    position: fixed;
+    background: #f4f9ff;
+    font-family: "Hiragino Sans", "Arial", sans-serif;
+    touch-action: none;
+  }
+  body { display: flex; justify-content: center; align-items: center; }
 
   /* タイトル */
   .title {
@@ -50,16 +48,78 @@ body { display: flex; justify-content: center; align-items: center; }
 
   /* 背景アニメーション */
   .palm-wrap {
-    width: 100vw; height: 100dvh; height: calc(var(--vh) * 100);
+    width: 100vw; height: 100vh;
     animation: palm-sway 12s ease-in-out infinite;
     transform-origin: 35% 90%;
     pointer-events: none;
   }
-  svg { width: 100vw; height: 100dvh; height: calc(var(--vh) * 100); transform: translateX(-22vw); }
+  svg { width: 100vw; height: 100vh; transform: translateX(-22vw); }
   @keyframes palm-sway {
     0%,100% { transform: rotate(-0.8deg); }
     50%     { transform: rotate(0.8deg); }
   }
+
+
+  /* ===== 追加: はじめて/中級 + チューニング誘導（スクロールなし） ===== */
+  .overlay {
+    position: fixed; inset: 0; z-index: 999;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(2px);
+  }
+  .overlay.show { display: flex; }
+  .card {
+    width: min(560px, 92vw);
+    background: rgba(255,255,255,0.96);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    padding: 16px;
+    color: #222;
+  }
+  .card h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+  }
+  .card p { margin: 6px 0 0; font-size: 13px; line-height: 1.4; opacity: 0.9; }
+  .choiceRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .choiceBtn {
+    border: 2px solid rgba(0,0,0,0.10);
+    border-radius: 14px;
+    padding: 12px;
+    background: #fff;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 4px 0 rgba(122,177,204,0.20);
+  }
+  .choiceBtn:active { transform: translateY(1px); box-shadow: none; }
+  .choiceBtn .sub { display:block; font-weight: 700; font-size: 12px; opacity: 0.85; margin-top: 4px; }
+
+  .actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
+  .actionBtn {
+    border: none; border-radius: 14px; padding: 12px 14px;
+    font-weight: 900; font-size: 16px; cursor: pointer;
+    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+  }
+  .actionPrimary { background: #eef6ff; color: #234; border: 2px solid #c9ddff; }
+  .actionSecondary { background: #fff; color: #333; border: 2px solid #e6e6e6; }
+  .actionSecondary small { display:block; font-size: 12px; opacity: 0.78; margin-top: 4px; font-weight: 800; }
+
+  .tinyNote { margin-top: 10px; font-size: 12px; opacity: 0.78; }
+
+  .version-badge{
+    position: fixed; left: 10px; bottom: 10px; z-index: 20;
+    font-size: 11px; font-weight: 800; color: #234;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 4px 8px; border-radius: 10px;
+    pointer-events: none;
+  }
+
+
+  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -67,7 +127,7 @@ body { display: flex; justify-content: center; align-items: center; }
 <div class="title">ウクレレであそぼう</div>
 
 <div class="menu">
-  <button id="btn-start" class="primary" onclick="location.href='game.html'">▶ はじめる</button>
+  <button id="btn-start" class="primary" onclick="startFlow()">▶ はじめる</button>
   <button id="btn-tuning" onclick="location.href='tuning.html'">🎵 チューニング</button>
   <button id="btn-help" onclick="alert('音に合わせて画面をタップしたり、実際にウクレレを弾いて遊ぶゲームです！')">？ つかいかた</button>
 </div>
@@ -99,6 +159,33 @@ body { display: flex; justify-content: center; align-items: center; }
 </svg>
 </div>
 
+
+
+<div class="overlay" id="levelOverlay" aria-hidden="true">
+  <div class="card">
+    <h2>どっちで あそぶ？</h2>
+    <p>はじめての人は「はじめて（初級）」がおすすめ。</p>
+    <div class="choiceRow">
+      <button class="choiceBtn" onclick="chooseLevel('beginner')">① はじめて（初級）<span class="sub">ゆっくり・やさしめ</span></button>
+      <button class="choiceBtn" onclick="chooseLevel('intermediate')">② だいたい わかる（中級）<span class="sub">ふつうのスピード</span></button>
+    </div>
+    <div class="tinyNote">※あとで変更できます（TOP画面で選び直し）</div>
+  </div>
+</div>
+
+<div class="overlay" id="gateOverlay" aria-hidden="true">
+  <div class="card">
+    <h2>ゲームのまえに、チューニングしよう</h2>
+    <p>チューニングすると、あなたの音に合わせて「HITの判定」を調整できます。</p>
+    <div class="actions">
+      <button class="actionBtn actionPrimary" onclick="goTuning()">🎵 チューニングしてからゲーム</button>
+      <button class="actionBtn actionSecondary" onclick="goGameTap()">🪕 まずはタップで あそぶ<small>（マイクなしでもOK）</small></button>
+    </div>
+  </div>
+</div>
+
+<div class="version-badge">v_index_safe_2026-01-18a</div>
+
 <script>
 (function(){
   function setVh(){
@@ -113,8 +200,66 @@ body { display: flex; justify-content: center; align-items: center; }
   }
   window.addEventListener('resize', setVh);
   window.addEventListener('orientationchange', () => setTimeout(setVh, 250));
+
+  const KEY_LEVEL = 'uk_level_v1';
+  const KEY_TUNING = 'uk_game_thresholds_v1';
+
+  function show(id){ document.getElementById(id).classList.add('show'); }
+  function hide(id){ document.getElementById(id).classList.remove('show'); }
+
+  window.chooseLevel = function(level){
+    try{ localStorage.setItem(KEY_LEVEL, level); }catch(e){}
+    hide('levelOverlay');
+    // レベル選択後はチューニング誘導へ
+    show('gateOverlay');
+  };
+
+  function getLevel(){
+    try{ return localStorage.getItem(KEY_LEVEL); }catch(e){ return null; }
+  }
+
+  function hasFreshTuning(){
+    try{
+      const raw = localStorage.getItem(KEY_TUNING);
+      if(!raw) return false;
+      const o = JSON.parse(raw);
+      if(!o || !o.ts) return false;
+      // 24時間以内なら「今日のチューニング」とみなす
+      return (Date.now() - Number(o.ts)) < 24*60*60*1000;
+    }catch(e){
+      return false;
+    }
+  }
+
+  window.startFlow = function(){
+    // まずレベルが未設定なら選んでもらう
+    const lv = getLevel();
+    if(!lv){ show('levelOverlay'); return; }
+
+    // ここは「半強制」方針：基本はチューニングへ誘導
+    // ただし、すでに今日チューニング済みなら gateOverlay は出さずゲームへ
+    if(hasFreshTuning()){
+      location.href = 'game.html';
+      return;
+    }
+    show('gateOverlay');
+  };
+
+  window.goTuning = function(){
+    hide('gateOverlay');
+    location.href = 'tuning.html?next=game';
+  };
+
+  window.goGameTap = function(){
+    hide('gateOverlay');
+    // まずはタップで遊べる導線
+    location.href = 'game.html?mode=TAP';
+  };
+
 })();
 </script>
 
+
+<div class="verBadge">v_release_20260118_index</div>
 </body>
 </html>
