@@ -156,7 +156,7 @@
     -2px 2px 0 #111,
     2px -2px 0 #111,
     -2px -2px 0 #111,
-    0 10px 24px rgba(0,0,0,0.25);
+    0 10px 20px rgba(0,0,0,0.22);
 }
 #fxMsg.hit{ color: #ff3d00; }
 #fxMsg.miss{ color: #2563eb; background: rgba(207,232,255,0.96); }
@@ -346,7 +346,7 @@ let gameEndAt = 0;
 let score = 0;
 let groups = [];
 let stars = [];
-const STAR_CAP = 140; // パフォーマンス上限
+const STAR_CAP = 90; // パフォーマンス上限（軽量化） // パフォーマンス上限
 function burstStars(n, x, y, waves=1, waveDelay=120){
   const make = ()=>{
     const add = Math.min(n, STAR_CAP);
@@ -383,24 +383,7 @@ function flashScreen(){
   f.classList.add('flash');
 }
 
-function updateComboUI(){
-  // combo is shown in FX only (to avoid lingering white text)
-  const big = document.getElementById('comboBig');
-  if(big){
-    big.style.display = 'none';
-    big.textContent = '';
-  }
-}
-
-  }
-  // legacy panel (kept but hidden)
-  const p = document.getElementById('combo-panel');
-  const n = document.getElementById('comboNum');
-  if(p && n){
-    n.textContent = String(comboStreak);
-  }
-}
-
+function updateComboUI(){ /* disabled */ }
 function showFx(text, kind, opts = {}){
   const el = document.getElementById('fxMsg');
   if(!el) return;
@@ -473,7 +456,7 @@ const SONG_DATA = [
 
 let songIndex=0; let practiceIndex=0; let scaleIndex=0;
 let currentLevelChords = [];
-let spawnInterval = 2800; // ← 間隔を広げてごちゃつき防止（全メニュー共通）
+let spawnInterval = 2800; // ← 間隔（ms）: 全メニュー共通
 let lastStartParams = null; // リトライ用
 
 // --- UI操作 ---
@@ -604,7 +587,7 @@ function initGame(mode, levelData, opts){
   isSongMode = (mode==='song');
   currentLevelChords = levelData || [];
   practiceIndex=0; scaleIndex=0; songIndex=0;
-  spawnInterval = (mode==='scale') ? 2000 : 1800;
+  spawnInterval = 2800; // 全モード共通（ドレミファも曲も）
 
   document.getElementById('score').innerText="0";
   document.getElementById('lyrics-area').innerText="";
@@ -640,7 +623,7 @@ function gameLoop(time){
     let cnt=0, maxX=-9999;
     for(let g of groups) { if(g.active){ cnt++; if(g.x>maxX) maxX=g.x; } }
     
-    if(cnt<4 && (maxX < canvas.width+120 - 320)){
+    if(cnt<3 && (maxX < canvas.width+120 - 760)){ // ← 体感で“間隔が広い”ように spacing を強化
       if(isSongMode){
         const d = SONG_DATA[songIndex % SONG_DATA.length];
         groups.push(new ChordGroup(d.lib[d.key], d.lyrics));
@@ -908,7 +891,7 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 </script>
 
 <div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
-game_iphone_fix_v7
+game_iphone_fix_v11
 </div>
 </body>
 </html>
