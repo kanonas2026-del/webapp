@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#88cfd3" />
-  <title>ウクレレ・ゲーム</title>
-  <style>/* iphone-viewport-fix */
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="#88cfd3" name="theme-color"/>
+<title>ウクレレ・ゲーム</title>
+<style>/* iphone-viewport-fix */
 
     :root{
       --vh: 1vh;
@@ -77,7 +78,7 @@
       padding: 6px 12px; border-radius: 14px; font-weight: 900; font-size: 18px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none;
     }
-    #score-panel { top: calc(60px + var(--ui-top, 0px) + env(safe-area-inset-top)); right: calc(12px + var(--ui-right, 0px) + env(safe-area-inset-right)); }
+    #score-panel { top: calc(60px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); }
     #timer-panel { top: calc(12px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); font-size: 16px; }
 
     #stopBtn {
@@ -240,121 +241,163 @@
     /* comboBig disabled (show combo only in FX) */
     #comboBig{ display:none !important; }
   
-  .verBadge{ position:fixed; left: calc(12px + var(--ui-left, 0px) + env(safe-area-inset-left)); right:auto; bottom: calc(12px + var(--ui-bottom, 0px) + env(safe-area-inset-bottom)); padding:8px 12px; border-radius:12px; background:rgba(0,0,0,0.65); color:#fff; font-weight:800; font-size:13px; letter-spacing:0.4px; z-index:120; user-select:none; }
+  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
+
+
+/* === KIDS UI THEME (SAFE: style/text only) ========================= */
+:root{
+  --kids-font: "M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Arial",sans-serif;
+  --kids-ink: #2b2017;
+  --kids-white: rgba(255,255,255,0.96);
+  --kids-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.18);
+}
+
+/* font */
+body, button, input, select, textarea { font-family: var(--kids-font) !important; }
+
+/* soft playful background (lightweight) */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  pointer-events:none;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(255,255,255,0.55) 0 14px, transparent 15px),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.45) 0 10px, transparent 11px),
+    radial-gradient(circle at 40% 82%, rgba(255,255,255,0.40) 0 12px, transparent 13px),
+    radial-gradient(circle at 90% 76%, rgba(255,255,255,0.35) 0 9px, transparent 10px);
+  opacity: 0.75;
+  mix-blend-mode: soft-light;
+}
+
+/* version badge: move away from buttons */
+.verBadge{
+  left: calc(10px + env(safe-area-inset-left)) !important;
+  right: auto !important;
+  bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+  font-size: 12px !important;
+  border-radius: 14px !important;
+}
+
+/* game: friendly font and panels */
+#score-panel, #timer-panel{
+  border: 4px solid rgba(255,255,255,0.95) !important;
+  background: rgba(255,255,255,0.92) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.16) !important;
+  font-weight: 900 !important;
+}
+#stopBtn{
+  border: 4px solid rgba(255,255,255,0.95) !important;
+  border-radius: 26px !important;
+  box-shadow: var(--kids-shadow) !important;
+  font-weight: 1000 !important;
+}
+#stopBtn:active{ transform: translateY(6px) !important; }
+
+/* chord name visibility */
+#chordHud{
+  display: block;
+  background: rgba(255,255,255,0.96) !important;
+  border: 4px solid rgba(0,0,0,0.72) !important;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.18) !important;
+  top: max(74px, calc(12px + env(safe-area-inset-top) + 12px)) !important;
+  font-size: clamp(22px, 6vw, 34px) !important;
+}
+
+/* hide persistent combo text (user requested) */
+#combo-panel{ display:none !important; }
+
+/* FX message: keep fun but lighter */
+#fxMsg{
+  border-width: 4px !important;
+  box-shadow: 0 14px 26px rgba(0,0,0,0.22) !important;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.25), 0 10px 18px rgba(0,0,0,0.18) !important;
+}
+
+/* prevent overlap: back button & safe area */
+#back-btn{ top: calc(10px + env(safe-area-inset-top)) !important; left: calc(10px + env(safe-area-inset-left)) !important; }
+#back-btn button{
+  border: 4px solid rgba(255,255,255,0.95) !important;
+  border-radius: 26px !important;
+  box-shadow: var(--kids-shadow) !important;
+  font-weight: 900 !important;
+}
+
+
 </style>
-</head>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
 <body>
-
 <div id="app">
-  <div id="menu-overlay">
-    <div class="menu-card">
-      <h1 style="margin-bottom: 2px;">🪕 ゲームメニュー</h1>
-      
-      <div class="menu-list" style="display:flex; flex-direction:column; gap:8px;">
-        <button class="menu-btn mode1" onclick="prepGame('scale')">
-          <div class="badge">🐤</div>
-          <div class="menu-text"><div class="title">ドレミファソラシド</div><small>だんだん速くなるよ</small></div>
-        </button>
-        <button class="menu-btn mode2" onclick="prepGame('easy')">
-          <div class="badge">🐱</div>
-          <div class="menu-text"><div class="title">コード かんたん</div><small>C / F / G7 / Am</small></div>
-        </button>
-        <button class="menu-btn mode3" onclick="prepGame('hard')">
-          <div class="badge">🐼</div>
-          <div class="menu-text"><div class="title">コード ちょいむず</div><small>いろいろなコード</small></div>
-        </button>
-        <button class="menu-btn mode4" onclick="prepGame('song')">
-          <div class="badge">🦁</div>
-          <div class="menu-text"><div class="title">曲：きらきら星</div><small>メロディ＋コード</small></div>
-        </button>
-      </div>
-
-      <div class="mode-select">
-        <div class="mode-pills">
-          <div class="mode-pill" data-mode="NORMAL" onclick="setMode(this, 'NORMAL')">ノーマル</div>
-          <div class="mode-pill active" data-mode="WAIT" onclick="setMode(this, 'WAIT')">まちモード</div>
-          <div class="mode-pill" data-mode="TAP" onclick="setMode(this, 'TAP')">タップモード</div>
-        </div>
-      </div>
-      
-      <button class="action-btn btn-secondary" onclick="location.href='index.html'" style="margin-top:10px;">🏝️ TOPへもどる</button>
-    </div>
-  </div>
-
-  <div id="screenFlash"></div>
-  <div id="fxMsg"></div>
-  <div id="comboBig"></div>
-
-  <div id="lyrics-area"></div>
-  <div id="combo-panel"><div class="t1">COMBO</div><div class="t2"><span id="comboNum">0</span> 連続</div></div>
-  <div id="score-panel">⭐ <span id="score">0</span></div>
-  <div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
-  <div id="chordHud" aria-hidden="true"></div>
-  
-  <div id="back-btn"><button onclick="goMenu()">🏝️ メニュー</button></div>
-  <button id="stopBtn" type="button">ストップ</button>
-
-  <div id="loading-overlay" class="overlay-card">
-    <div class="card-content">
-      <h2>マイクじゅんび中...</h2>
-      <p id="loading-msg">静かにしてね（ノイズをはかっています）</p>
-    </div>
-  </div>
-
-  <div id="pause-overlay" class="overlay-card">
-    <div class="card-content">
-      <h2>ストップ中</h2>
-      <button class="action-btn btn-primary" onclick="resumeGame()">つづける</button>
-      <button class="action-btn btn-secondary" onclick="goMenu()">メニューへ</button>
-    </div>
-  </div>
-
-  <div id="result-overlay" class="overlay-card">
-    <div class="card-content">
-      <h2>Finish!</h2>
-      <div class="result-score">⭐ <span id="result-score">0</span> pts</div>
-      <p id="result-msg">Good Job!</p>
-      <button class="action-btn btn-primary" onclick="restartLast()">もう１回</button>
-      <button class="action-btn btn-secondary" onclick="goMenu()">メニュー</button>
-    </div>
-  </div>
-
-  <canvas id="gameCanvas"></canvas>
+<div id="menu-overlay">
+<div class="menu-card">
+<h1 style="margin-bottom: 2px;">🪕 ゲームメニュー</h1>
+<div class="menu-list" style="display:flex; flex-direction:column; gap:8px;">
+<button class="menu-btn mode1" onclick="prepGame('scale')">
+<div class="badge">🐤</div>
+<div class="menu-text"><div class="title">ドレミファソラシド</div><small>だんだん速くなるよ</small></div>
+</button>
+<button class="menu-btn mode2" onclick="prepGame('easy')">
+<div class="badge">🐱</div>
+<div class="menu-text"><div class="title">コード かんたん</div><small>C / F / G7 / Am</small></div>
+</button>
+<button class="menu-btn mode3" onclick="prepGame('hard')">
+<div class="badge">🐼</div>
+<div class="menu-text"><div class="title">コード ちょいむず</div><small>いろいろなコード</small></div>
+</button>
+<button class="menu-btn mode4" onclick="prepGame('song')">
+<div class="badge">🦁</div>
+<div class="menu-text"><div class="title">曲：きらきら星</div><small>メロディ＋コード</small></div>
+</button>
 </div>
-
+<div class="mode-select">
+<div class="mode-pills">
+<div class="mode-pill" data-mode="NORMAL" onclick="setMode(this, 'NORMAL')">ノーマル</div>
+<div class="mode-pill active" data-mode="WAIT" onclick="setMode(this, 'WAIT')">まちモード</div>
+<div class="mode-pill" data-mode="TAP" onclick="setMode(this, 'TAP')">タップモード</div>
+</div>
+</div>
+<button class="action-btn btn-secondary" onclick="location.href='index.html'" style="margin-top:10px;">🏝️ TOPへもどる</button>
+</div>
+</div>
+<div id="screenFlash"></div>
+<div id="fxMsg"></div>
+<div id="comboBig"></div>
+<div id="lyrics-area"></div>
+<div id="combo-panel"><div class="t1">COMBO</div><div class="t2"><span id="comboNum">0</span> 連続</div></div>
+<div id="score-panel">⭐ <span id="score">0</span></div>
+<div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
+<div aria-hidden="true" id="chordHud"></div>
+<div id="back-btn"><button onclick="goMenu()">🏝️ さいしょに もどる</button></div>
+<button id="stopBtn" type="button">ちょっと まって</button>
+<div class="overlay-card" id="loading-overlay">
+<div class="card-content">
+<h2>マイクじゅんび中...</h2>
+<p id="loading-msg">静かにしてね（ノイズをはかっています）</p>
+</div>
+</div>
+<div class="overlay-card" id="pause-overlay">
+<div class="card-content">
+<h2>ちょっと まって中</h2>
+<button class="action-btn btn-primary" onclick="resumeGame()">つづける</button>
+<button class="action-btn btn-secondary" onclick="goMenu()">メニューへ</button>
+</div>
+</div>
+<div class="overlay-card" id="result-overlay">
+<div class="card-content">
+<h2>Finish!</h2>
+<div class="result-score">⭐ <span id="result-score">0</span> pts</div>
+<p id="result-msg">Good Job!</p>
+<button class="action-btn btn-primary" onclick="restartLast()">もう１回</button>
+<button class="action-btn btn-secondary" onclick="goMenu()">メニュー</button>
+</div>
+</div>
+<canvas id="gameCanvas"></canvas>
+</div>
 <script>
 // ===== 基本設定 =====
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-// --- UI safe-area for browser bars (no install required) ---
-function updateUiVars(){
-  const vv = window.visualViewport;
-  if(vv){
-    const top = Math.max(0, vv.offsetTop||0);
-    const left = Math.max(0, vv.offsetLeft||0);
-    const right = Math.max(0, (window.innerWidth - vv.width - left));
-    const bottom = Math.max(0, (window.innerHeight - vv.height - top));
-    document.documentElement.style.setProperty('--ui-top', Math.round(top)+'px');
-    document.documentElement.style.setProperty('--ui-left', Math.round(left)+'px');
-    document.documentElement.style.setProperty('--ui-right', Math.round(right)+'px');
-    document.documentElement.style.setProperty('--ui-bottom', Math.round(bottom)+'px');
-  } else {
-    document.documentElement.style.setProperty('--ui-top','0px');
-    document.documentElement.style.setProperty('--ui-left','0px');
-    document.documentElement.style.setProperty('--ui-right','0px');
-    document.documentElement.style.setProperty('--ui-bottom','0px');
-  }
-}
-updateUiVars();
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', updateUiVars);
-  window.visualViewport.addEventListener('scroll', updateUiVars);
-}
-window.addEventListener('resize', updateUiVars);
-window.addEventListener('orientationchange', ()=>setTimeout(updateUiVars, 250));
-
 
 let gameState = 'MENU';
 let playMode = 'WAIT';
@@ -979,6 +1022,9 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 
 })();
 </script>
-<div class="verBadge">v_release_20260118_game_fixB</div>
+<div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
+game_iphone_fix_v11
+</div>
+<div class="verBadge">v_release_20260118_game</div>
 </body>
 </html>
