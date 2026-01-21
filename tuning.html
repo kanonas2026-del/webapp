@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<title>おとの じゅんび</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ウクレレ診断 - チューニング</title>
+  <style>
     /* スタイルは前回の「グレーアウト」と「弦の色」を維持 */
-    body { margin: 0; background: #4a3728; color: #1b1b1b; font-family: sans-serif; overflow: hidden; touch-action: none; }
+    body { margin: 0; background: #4a3728; color: #fff; font-family: sans-serif; overflow: hidden; touch-action: none; }
 
-    :root{ --vvh: 1vh; --vvTop: 0px; 
+    :root{
+      --vh: 1vh;
+
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
@@ -32,19 +33,21 @@
     .nav-back a:active { transform: scale(0.95); }
 
     /* ===== iPhone / small screen responsive fixes (UI崩れ対策) ===== */
-    #guide-msg{ top: calc(var(--safe-top) + var(--vvTop, 0px) + 8px);
+    #guide-msg{
+      top: calc(var(--safe-top) + 10px);
       padding: 0 12px;
       font-size: clamp(16px, 4.8vw, 26px);
       line-height: 1.2;
       white-space: normal;
       word-break: keep-all;
     }
-    #tuner-nav{ top: calc(var(--safe-top) + var(--vvTop, 0px) + 56px);
+    #tuner-nav{
+      top: calc(var(--safe-top) + 54px);
       height: auto;
       min-height: 92px;
       font-size: clamp(46px, 12vw, 80px);
     }
-    .status-msg{
+
       font-size: clamp(14px, 4.2vw, 24px);
       margin-top: 2px;
       line-height: 1.2;
@@ -68,7 +71,7 @@
       padding: clamp(16px, 4.8vw, 25px) clamp(28px, 7vw, 50px);
     }
     #diagnosis-card{
-      max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 40px);
+      max-height: calc((var(--vh) * 100) - var(--safe-top) - var(--safe-bottom) - 40px);
       overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -79,15 +82,15 @@
       .ui-panel{ bottom: calc(var(--safe-bottom) + 10px); }
     }
 
-    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: calc(var(--vvh, 1vh) * 100); position: relative; }
+    #screen-tuning { background: linear-gradient(to bottom, #7ab1cc 0%, #a8e6cf 100%); width: 100vw; height: 100dvh; height: calc(var(--vh) * 100); position: relative; }
     canvas { display: block; width: 100%; height: 100%; }
     #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .start-btn { background: #ff914d; color: white; border: none; padding: 25px 50px; font-size: 24px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 0 #d97b41; }
-    #guide-msg { position: absolute; top: 6%; width: 100%; text-align: center; font-size: 26px; font-weight: bold; color: #1b1b1b; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 5; }
+    #guide-msg { position: absolute; top: 6%; width: 100%; text-align: center; font-size: 26px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 5; }
     #tuner-nav { position: absolute; top: 12%; left: 50%; transform: translateX(-50%); text-align: center; font-size: 80px; font-weight: 900; z-index: 5; height: 120px;}
     .arrow-up { color: #ff5757; text-shadow: 0 0 20px #fff; }
     .arrow-down { color: #5ce1e6; text-shadow: 0 0 20px #fff; }
-    .status-msg { font-size: 24px; display: block; margin-top: -10px; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    .status-msg { font-size: 22px; display:block; margin-top: 8px; line-height: 1.2; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
     .ui-panel { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10; }
     .string-btn { width: 75px; height: 75px; border-radius: 50%; border: 4px solid #fff; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: white; opacity: 0.8; }
     .string-btn.played { background: #888 !important; color: #ccc !important; border-color: #666 !important; transform: scale(0.9); opacity: 0.5; }
@@ -141,7 +144,7 @@
   padding: 14px 22px;
   font-size: 18px;
   font-weight: 800;
-  color: #1b1b1b;
+  color: #fff;
   background: #3fc26b;
   box-shadow: 0 8px 0 rgba(0,0,0,0.08);
   cursor: pointer;
@@ -181,7 +184,7 @@
 
 
     /* ===== iPhone landscape fix (横画面でボタンがネックに被る対策) ===== */
-    @media (orientation: landscape) and (max-height: 520px){
+    @media (orientation: landscape){
       /* 上のガイドは1行に寄せて省スペース */
       #guide-msg{
         top: calc(var(--safe-top) + 6px);
@@ -234,215 +237,65 @@
 .diag-personality{margin-top:16px; font-size:32px; font-weight:900; color:#3a2a1a; text-align:center;}
 
 
-.version-badge{position:fixed;left:10px;bottom:10px;z-index:9999;font-size:11px;font-weight:800;color:#234;background:rgba(255,255,255,0.72);border:1px solid rgba(0,0,0,0.08);padding:4px 8px;border-radius:10px;pointer-events:none;}
-
-  .verBadge{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);right:auto;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;pointer-events:none;}
-
-
-/* === KIDS UI THEME (SAFE: style/text only) ========================= */
-:root{
-  --kids-font: "M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Arial",sans-serif;
-  --kids-ink: #2b2017;
-  --kids-white: rgba(255,255,255,0.96);
-  --kids-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.18);
-}
-
-/* font */
-body, button, input, select, textarea { font-family: var(--kids-font) !important; }
-
-/* soft playful background (lightweight) */
-body::before{
-  content:"";
-  position:fixed; inset:0;
-  pointer-events:none;
-  background-image:
-    radial-gradient(circle at 12% 22%, rgba(255,255,255,0.55) 0 14px, transparent 15px),
-    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.45) 0 10px, transparent 11px),
-    radial-gradient(circle at 40% 82%, rgba(255,255,255,0.40) 0 12px, transparent 13px),
-    radial-gradient(circle at 90% 76%, rgba(255,255,255,0.35) 0 9px, transparent 10px);
-  opacity: 0.75;
-  mix-blend-mode: soft-light;
-}
-
-/* version badge: move away from buttons */
-.verBadge{
-  left: calc(10px + env(safe-area-inset-left)) !important;
-  right: auto !important;
-  bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-  font-size: 12px !important;
-  border-radius: 14px !important;
-}
-
-/* tuning: iOS safe height */
-#screen-tuning{
-  height: 100dvh !important;
-  height: 100vh !important;
-}
-
-/* top/back button puffy */
-.nav-back a{
-  border: 4px solid rgba(255,255,255,0.95) !important;
-  border-radius: 26px !important;
-  box-shadow: var(--kids-shadow) !important;
-  font-weight: 900 !important;
-}
-
-/* small mascot */
-.kids-mini{
-  position: fixed;
-  left: calc(12px + var(--safe-left));
-  top: calc(var(--safe-top) + 10px);
-  z-index: 210;
-  font-size: 40px;
-  filter: drop-shadow(0 10px 0 rgba(0,0,0,0.10));
-  pointer-events: none;
-}
-#guide-msg{
-  font-weight: 900 !important;
-  text-shadow: 0 4px 0 rgba(0,0,0,0.25) !important;
-}
-
-/* move internal version-badge (if exists) away from bottom */
-.version-badge{
-  left: calc(10px + var(--safe-left)) !important;
-  right: auto !important;
-  bottom: calc(10px + var(--safe-bottom)) !important;
-}
-
-/* keep UI panel from being clipped */
-.ui-panel{
-  padding-bottom: calc(10px + var(--safe-bottom)) !important;
-}
-
-/* === KIDS_UI_OVERRIDES === */
-:root{
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-/* Use real viewport height on iOS */
-html, body{
-  height: calc(var(--vvh, var(--vh, 1vh)) * 100);
-}
-/* version badge: never overlap buttons */
-.verBadge{
-  left: calc(var(--safe-left) + 12px) !important;
-  right: auto !important;
-  bottom: calc(var(--safe-bottom) + 10px) !important;
-  z-index: 9999 !important;
-  pointer-events: none;
-}
-
-/* Tuning header text: no overlap, no clipping */
-#guide-msg{
-  top: calc(var(--safe-top) + 10px) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: min(640px, 86vw) !important;
-  padding: 10px 14px !important;
-  line-height: 1.25 !important;
-  font-size: clamp(18px, 4.2vw, 28px) !important;
-  text-align: center !important;
-  white-space: normal !important;
-  border-radius: 18px !important;
-  background: rgba(255,255,255,0.78) !important;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 10px 0 rgba(0,0,0,0.10);
-}
-/* Keep TOP button away from guide */
-#topBtn, .topBtn, #btnTop{
-  top: calc(var(--safe-top) + 10px) !important;
-}
-/* Canvas should not be squashed */
-#tuningCanvas, canvas{
-  display:block;
-}
-/* remove accidental mascot-in-tuning if present */
-.kids-mini{ display:none !important; }
-/* Emoji font fallback (iOS/Android) */
-.badge, .kids-mascot, .emoji{
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif !important;
-  font-variant-emoji: emoji;
-}
-/* Disable bubble circles (look like white rings on iPhone) */
-body::before{ display:none !important; background:none !important; }
-/* iPhone: avoid text overlap & bottom cut */
-#screen-tuning{
-  padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
-  box-sizing: border-box;
-}
-#guide-msg{
-  max-width: 88vw;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.18);
-}
-#tuner-nav{
-  top: calc(var(--safe-top) + var(--vvTop, 0px) + 74px) !important;
-  min-height: 78px !important;
-}
-</style>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/><script>
-/* UI safety: iOS Safari viewport fix (no core logic) */
-(function(){
-  function setVh(){
-    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
-    // visualViewport helps when the top/bottom bars appear/disappear
-    if (window.visualViewport) {
-      document.documentElement.style.setProperty('--vvh', (window.visualViewport.height * 0.01) + 'px');
-    }
+  /* iPhone横で、見出しと状態が重ならないように */
+  @media (orientation: landscape) and (max-height: 430px){
+    #guide-msg{ top: calc(env(safe-area-inset-top) + 8px) !important; font-size: 26px !important; padding: 10px 14px !important; }
+    #tuner-nav{ top: calc(env(safe-area-inset-top) + 64px) !important; }
   }
-  window.addEventListener('resize', setVh, {passive:true});
-  window.addEventListener('orientationchange', setVh, {passive:true});
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', setVh, {passive:true});
-  setVh();
-})();
-</script>
+
+</style>
 </head>
 <body>
-<div id="start-overlay">
-<button class="start-btn" onclick="startEverything()">🎵 おとの じゅんびをはじめましょう！</button>
-</div>
-<div class="nav-back"><a href="index.html">🏝️ さいしょに もどる</a></div>
 
-<section id="screen-tuning">
-<div id="guide-msg">1げんを ひいてみよう</div>
-<div id="tuner-nav">
-<div id="nav-arrow"></div>
-<div class="status-msg" id="nav-text"></div>
-</div>
-<canvas id="tuningCanvas"></canvas>
-<div class="splash" id="diagnosis-splash">
-<div class="splash-inner">
-<div class="splash-pop" id="splash-pop">今日のウクレレ診断結果！！</div>
-<button class="splash-btn" id="btn-show-result">結果を見る</button>
-</div>
-</div>
+  <div id="start-overlay">
+    <button class="start-btn" onclick="startEverything()">🎵 チューニングをはじめましょう！</button>
+  </div>
+
+  <div class="nav-back"><a href="index.html">🏝️ TOPへ</a></div>
+
+  <section id="screen-tuning">
+    <div id="guide-msg">1げんを ひいてみよう</div>
+    <div id="tuner-nav">
+      <div id="nav-arrow"></div>
+      <div id="nav-text" class="status-msg"></div>
+    </div>
+    <canvas id="tuningCanvas"></canvas>
+    
+  <div id="diagnosis-splash" class="splash">
+    <div class="splash-inner">
+      <div class="splash-pop" id="splash-pop">今日のウクレレ診断結果！！</div>
+      <button id="btn-show-result" class="splash-btn">結果を見る</button>
+    </div>
+  </div>
+
 <div id="diagnosis-card">
-<div id="diag-face" style="margin-bottom:10px; display:flex; justify-content:center;"><img alt="face" id="diag-face-img" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22g%22%20cx%3D%2230%25%22%20cy%3D%2230%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffe08a%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ffb347%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%3C/defs%3E%0A%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%2260%22%20r%3D%2252%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23e59a2b%22%20stroke-width%3D%224%22/%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2244%22%20cy%3D%2248%22%20r%3D%228%22%20fill%3D%22%233a2a1a%22/%3E%3Ccircle%20cx%3D%2276%22%20cy%3D%2248%22%20r%3D%228%22%20fill%3D%22%233a2a1a%22/%3E%0A%20%20%3Cpath%20d%3D%22M40%2070%20Q60%2088%2080%2070%22%20fill%3D%22none%22%20stroke%3D%22%233a2a1a%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E" style="width:120px; height:120px;"/></div>
-<h2 style="color: #ff914d;">今日のウクレレ診断</h2>
-<div id="diag-title" style="font-size:18px; font-weight:900; color:#ff7a3d; margin-top:6px;"></div>
-<div id="diag-personality" style="font-size:28px; font-weight:900; margin:10px 0 6px; color:#4a3728;"></div>
-<div id="diag-ukulele" style="font-size:18px; font-weight:900; margin:4px 0 10px; color:#333;"></div>
-<div class="diag-scoreline" id="diag-scoreline"></div>
-<div class="diag-meaning" id="diag-meaning"></div>
+      <div id="diag-face" style="margin-bottom:10px; display:flex; justify-content:center;"><img id="diag-face-img" alt="face" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22g%22%20cx%3D%2230%25%22%20cy%3D%2230%25%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffe08a%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ffb347%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%3C/defs%3E%0A%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%2260%22%20r%3D%2252%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23e59a2b%22%20stroke-width%3D%224%22/%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2244%22%20cy%3D%2248%22%20r%3D%228%22%20fill%3D%22%233a2a1a%22/%3E%3Ccircle%20cx%3D%2276%22%20cy%3D%2248%22%20r%3D%228%22%20fill%3D%22%233a2a1a%22/%3E%0A%20%20%3Cpath%20d%3D%22M40%2070%20Q60%2088%2080%2070%22%20fill%3D%22none%22%20stroke%3D%22%233a2a1a%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E" style="width:120px; height:120px;"/></div>
+      <h2 style="color: #ff914d;">今日のウクレレ診断</h2>
+      <div id="diag-title" style="font-size:18px; font-weight:900; color:#ff7a3d; margin-top:6px;"></div>
+      <div id="diag-personality" style="font-size:28px; font-weight:900; margin:10px 0 6px; color:#4a3728;"></div>
+      <div id="diag-ukulele" style="font-size:18px; font-weight:900; margin:4px 0 10px; color:#333;"></div>
+      <div id="diag-scoreline" class="diag-scoreline"></div>
+      <div id="diag-meaning" class="diag-meaning"></div>
 <button id="btn-details" style="margin:10px auto 0; display:block; background:#fff; border:2px solid #ddd; border-radius:12px; padding:8px 14px; font-weight:900; cursor:pointer;">くわしく</button>
 <div id="detail-panel" style="display:none; margin-top:12px;">
-<div class="diag-item"><div class="diag-label">アドバイス</div><div class="diag-value" id="diag-advice"></div></div>
-<div class="diag-item"><div class="diag-label">性格の理由</div><div class="diag-value" id="diag-personality-reason"></div></div>
-<div class="diag-item"><div class="diag-label">げんのようす（原因のヒント）</div><div class="diag-value" id="diag-string-state"></div></div>
-<div class="diag-item"><div class="diag-label">コンディション</div><div class="diag-value" id="diag-cond"></div></div>
-<div class="diag-item"><div class="diag-label">メンテナンス</div><div class="diag-value" id="diag-maint"></div></div>
-</div>
-<button onclick="resetAll()" style="background:#7ed957; border:none; padding:12px 25px; border-radius:15px; color:white; font-weight:bold; cursor:pointer;">もういちど</button>
-<button onclick="location.href='game.html'" style="margin-top:10px; background:#ff914d; border:none; padding:12px 25px; border-radius:15px; color:white; font-weight:bold; cursor:pointer;">🪕 ゲームへ</button>
-</div>
-<div class="ui-panel">
-<div class="string-btn" id="btn3" onclick="manualSelect(3)" style="background:#5ce1e6">4 G</div>
-<div class="string-btn" id="btn2" onclick="manualSelect(2)" style="background:#7ed957">3 C</div>
-<div class="string-btn" id="btn1" onclick="manualSelect(1)" style="background:#ffde59; color:#4a3728">2 E</div>
-<div class="string-btn active" id="btn0" onclick="manualSelect(0)" style="background:#ff5757">1 A</div>
-</div>
-</section>
+        
+      <div class="diag-item"><div class="diag-label">アドバイス</div><div id="diag-advice" class="diag-value"></div></div>
+      <div class="diag-item"><div class="diag-label">性格の理由</div><div id="diag-personality-reason" class="diag-value"></div></div>
+      <div class="diag-item"><div class="diag-label">げんのようす（原因のヒント）</div><div id="diag-string-state" class="diag-value"></div></div>
+<div class="diag-item"><div class="diag-label">コンディション</div><div id="diag-cond" class="diag-value"></div></div>
+      <div class="diag-item"><div class="diag-label">メンテナンス</div><div id="diag-maint" class="diag-value"></div></div>
+      </div>
+      <button onclick="resetAll()" style="background:#7ed957; border:none; padding:12px 25px; border-radius:15px; color:white; font-weight:bold; cursor:pointer;">もういちど</button>
+    </div>
+
+    <div class="ui-panel">
+      <div class="string-btn" id="btn3" style="background:#5ce1e6" onclick="manualSelect(3)">4 G</div>
+      <div class="string-btn" id="btn2" style="background:#7ed957" onclick="manualSelect(2)">3 C</div>
+      <div class="string-btn" id="btn1" style="background:#ffde59; color:#4a3728" onclick="manualSelect(1)">2 E</div>
+      <div class="string-btn active" id="btn0" style="background:#ff5757" onclick="manualSelect(0)">1 A</div>
+    </div>
+  </section>
+
 <script>
 const canvas = document.getElementById('tuningCanvas');
 const ctx = canvas.getContext('2d');
@@ -485,49 +338,6 @@ function getPluckRiseRms(){
   if (IS_IOS && (currentTargetIdx === 1 || currentTargetIdx === 2)) return PLUCK_RISE_RMS * 0.28; // 2げん/3げん
   if (IS_IOS && (currentTargetIdx === 3)) return PLUCK_RISE_RMS * 0.34; // 4げん
   return PLUCK_RISE_RMS;
-}
-
-// ===== 追加: ゲーム用しきい値の保存 =====
-const KEY_GAME_THRESH = 'uk_game_thresholds_v1';
-
-function clamp(x, lo, hi){ return Math.max(lo, Math.min(hi, x)); }
-
-function computeGameThresholds(noiseRms, pluckPeak){
-  const N = (Number(noiseRms) > 0) ? Number(noiseRms) : 0.004;
-  let P = Number(pluckPeak);
-  if (!(P > N)) P = N + 0.012;
-
-  // ノイズと「ふつうの弾き方」の間の45%あたりをしきい値にする
-  const high = clamp(N + (P - N) * 0.45, N * 2.2, P * 0.85);
-  const rise = clamp((high - N) * 0.35, 0.0007, high * 0.60);
-  return { high, rise, noise: N, pluck: P };
-}
-
-function safeSetLS(key, value){
-  try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
-}
-
-function saveGameThresholdsFromTuning(){
-  try{
-    if (!DIAG) return;
-    const N = Number(DIAG.noiseRms || NOISE_RMS || 0);
-    const peaks = (DIAG.strings || []).map(s=>Number(s.rmsPeak||0)).filter(v=>v>0);
-    peaks.sort((a,b)=>a-b);
-    const P = peaks.length ? peaks[Math.floor(peaks.length/2)] : (N + 0.012);
-    const th = computeGameThresholds(N, P);
-
-    const obj = {
-      ts: Date.now(),
-      noiseRms: th.noise,
-      pluckPeak: th.pluck,
-      pluckHighRms: th.high,
-      pluckRiseRms: th.rise,
-      source: 'tuning'
-    };
-    safeSetLS(KEY_GAME_THRESH, JSON.stringify(obj));
-  }catch(e){
-    // ignore
-  }
 }
 
 let DIAG = null;
@@ -621,7 +431,7 @@ function buildDiagnosis() {
   if (!done.length) {
     return {
       title: "診断できなかった…",
-      condition: "もう一度おとの じゅんびしてみてね。",
+      condition: "もう一度チューニングしてみてね。",
       maintenance: "マイク許可と静かな場所を確認してね。"
     };
   }
@@ -688,7 +498,7 @@ function buildDiagnosis() {
 
   const tips2 = [];
   tips2.push(...tips);
-  if (wornHint) tips2.push("弦が疲れている可能性。最近交換していないなら、そろそろ交換も検討。\n（交換直後なら、伸びるので数回おとの じゅんびして馴染ませてね）");
+  if (wornHint) tips2.push("弦が疲れている可能性。最近交換していないなら、そろそろ交換も検討。\n（交換直後なら、伸びるので数回チューニングして馴染ませてね）");
   // 弦別ひとこと
   tips2.push(`弦の状態メモ：ズレやすい ${worstAcc.name}／揺れやすい ${worstStab.name}`);
 
@@ -1071,14 +881,13 @@ function markAsDone(idx) {
   } else {
     document.getElementById('guide-msg').innerText = "ぜんぶ できたね！";
     document.getElementById('nav-text').innerText = "";
-    saveGameThresholdsFromTuning();
     setTimeout(doDiagnosis, 800);
   }
 }
 
 // ★手動ボタンは「即クリア」ではなく「切替」に変更
 function manualSelect(idx) {
-  // 任意の弦を選択して再おとの じゅんびできる（完了済みでもOK）
+  // 任意の弦を選択して再チューニングできる（完了済みでもOK）
   currentTargetIdx = idx;
   pitchHistory = [];
   lastPluckAt = 0;
@@ -1515,7 +1324,7 @@ function makeStringInsights(diag, d){
 }
 
 function makeKidCondition(d){
-  // コンディション = 「今日のおとの じゅんびのむずかしさ（全体）」だけを言う
+  // コンディション = 「今日のチューニングのむずかしさ（全体）」だけを言う
   // ※ 何げんが〜 は「げんのようす」に集約して、内容のかぶりをなくす
   try{
     const score = Number(d?.score || d?.total || d?.totalScore || 0);
@@ -1650,7 +1459,7 @@ function doDiagnosis() {
   } catch (e) {
     d = {
       title: "診断エラー",
-      meaning: "もう一度おとの じゅんびしてみてね。",
+      meaning: "もう一度チューニングしてみてね。",
       scoreline: "",
       condition: "診断の計算中にエラーが出たみたい…（画面を更新して再チャレンジ！）",
       maintenance: ""
@@ -1759,13 +1568,22 @@ function doDiagnosis() {
 
   btn.addEventListener('click', showResult);
 }
-window.onresize = () => {
-  const host = document.getElementById('screen-tuning');
-  const r = host.getBoundingClientRect();
-  canvas.width = Math.max(1, Math.floor(r.width));
-  canvas.height = Math.max(1, Math.floor(r.height));
-};
-window.onresize(); draw();
+function applyViewportSize(){
+  const vv = window.visualViewport;
+  const h = vv ? vv.height : (document.documentElement.clientHeight || window.innerHeight);
+  const w = vv ? vv.width  : (document.documentElement.clientWidth  || window.innerWidth);
+  // expose CSS vh unit (for iPhone Safari 100vh issue)
+  document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
+  canvas.width = Math.floor(w);
+  canvas.height = Math.floor(h);
+}
+applyViewportSize();
+if (window.visualViewport){
+  window.visualViewport.addEventListener('resize', () => { applyViewportSize(); draw(); });
+}
+window.addEventListener('resize', () => { applyViewportSize(); draw(); });
+window.addEventListener('orientationchange', () => { setTimeout(() => { applyViewportSize(); draw(); }, 250); });
+draw();
 
 // ===== FINAL FACE OVERRIDE (text-based, no emoji prefix) =====
 (function(){
@@ -1796,6 +1614,8 @@ window.onresize(); draw();
 
 </script>
 
-<div class="verBadge">kids_ui_v3</div>
+<div style="position:fixed;right:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.9);color:#111;font-size:12px;font-weight:900;">
+tuning_fix_v1
+</div>
 </body>
 </html>

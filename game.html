@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="#88cfd3" name="theme-color"/>
-<title>ウクレレ・ゲーム</title>
-<style>/* iphone-viewport-fix */
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#88cfd3" />
+  <title>ウクレレ・ゲーム</title>
+  <style>/* iphone-viewport-fix */
 
-    :root{ --vvh: 1vh; --vvTop: 0px; 
+    :root{
       --vh: 1vh;
 
       --primary: #ff7a3d;
@@ -29,7 +28,7 @@
       user-select: none;
       -webkit-user-select: none;
     }
-    #app { position: fixed; inset: 0; width: 100%; height: calc(var(--vvh, 1vh) * 100); height: calc(var(--vh) * 100); overflow: hidden; padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
+    #app { position: fixed; inset: 0; width: 100%; height: 100dvh; height: calc(var(--vh) * 100); overflow: hidden; padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
     canvas { display:block; width:100%; height:100%; touch-action:none; }
 
     /* メニューオーバーレイ */
@@ -55,7 +54,7 @@
       transition: transform 0.08s; text-align: left;
     }
     .menu-btn:active { transform: translateY(2px); box-shadow: none; }
-    .badge { flex: 0 0 38px; height: 38px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color:#1b1b1b; }
+    .badge { flex: 0 0 38px; height: 38px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
     .menu-btn.mode2 .badge{ background: #ffde59; color:#4a3728; }
     .menu-btn.mode3 .badge{ background: #7ed957; }
     .menu-btn.mode4 .badge{ background: #5ce1e6; color: #133; }
@@ -122,7 +121,7 @@
       width: 100%; border: none; border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 900;
       cursor: pointer; margin-top: 10px;
     }
-    .btn-primary { background: var(--primary); color: #1b1b1b; }
+    .btn-primary { background: var(--primary); color: #fff; }
     .btn-secondary { background: #eee; color: #555; }
 
     @media (orientation: landscape) and (max-height: 460px) {
@@ -241,212 +240,90 @@
     /* comboBig disabled (show combo only in FX) */
     #comboBig{ display:none !important; }
   
-  .verBadge{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);right:auto;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;pointer-events:none;}
+  /* タップしやすさ */
+  button, .menuBtn, .bigBtn { touch-action: manipulation; }
 
-
-/* === KIDS UI THEME (SAFE: style/text only) ========================= */
-:root{
-  --kids-font: "M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Arial",sans-serif;
-  --kids-ink: #2b2017;
-  --kids-white: rgba(255,255,255,0.96);
-  --kids-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.18);
-}
-
-/* font */
-body, button, input, select, textarea { font-family: var(--kids-font) !important; }
-
-/* soft playful background (lightweight) */
-body::before{
-  content:"";
-  position:fixed; inset:0;
-  pointer-events:none;
-  background-image:
-    radial-gradient(circle at 12% 22%, rgba(255,255,255,0.55) 0 14px, transparent 15px),
-    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.45) 0 10px, transparent 11px),
-    radial-gradient(circle at 40% 82%, rgba(255,255,255,0.40) 0 12px, transparent 13px),
-    radial-gradient(circle at 90% 76%, rgba(255,255,255,0.35) 0 9px, transparent 10px);
-  opacity: 0.75;
-  mix-blend-mode: soft-light;
-}
-
-/* version badge: move away from buttons */
-.verBadge{
-  left: calc(10px + env(safe-area-inset-left)) !important;
-  right: auto !important;
-  bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-  font-size: 12px !important;
-  border-radius: 14px !important;
-}
-
-/* game: friendly font and panels */
-#score-panel, #timer-panel{
-  border: 4px solid rgba(255,255,255,0.95) !important;
-  background: rgba(255,255,255,0.92) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.16) !important;
-  font-weight: 900 !important;
-}
-#stopBtn{
-  border: 4px solid rgba(255,255,255,0.95) !important;
-  border-radius: 26px !important;
-  box-shadow: var(--kids-shadow) !important;
-  font-weight: 1000 !important;
-}
-#stopBtn:active{ transform: translateY(6px) !important; }
-
-/* chord name visibility */
-#chordHud{
-  display: block;
-  background: rgba(255,255,255,0.96) !important;
-  border: 4px solid rgba(0,0,0,0.72) !important;
-  text-shadow: 0 3px 0 rgba(0,0,0,0.18) !important;
-  top: max(74px, calc(12px + env(safe-area-inset-top) + 12px)) !important;
-  font-size: clamp(22px, 6vw, 34px) !important;
-}
-
-/* hide persistent combo text (user requested) */
-#combo-panel{ display:none !important; }
-
-/* FX message: keep fun but lighter */
-#fxMsg{
-  border-width: 4px !important;
-  box-shadow: 0 14px 26px rgba(0,0,0,0.22) !important;
-  text-shadow: 0 3px 0 rgba(0,0,0,0.25), 0 10px 18px rgba(0,0,0,0.18) !important;
-}
-
-/* prevent overlap: back button & safe area */
-#back-btn{ top: calc(10px + env(safe-area-inset-top)) !important; left: calc(10px + env(safe-area-inset-left)) !important; }
-#back-btn button{
-  border: 4px solid rgba(255,255,255,0.95) !important;
-  border-radius: 26px !important;
-  box-shadow: var(--kids-shadow) !important;
-  font-weight: 900 !important;
-}
-
-/* === KIDS_UI_OVERRIDES === */
-:root{
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-/* Use real viewport height on iOS */
-html, body{
-  height: calc(var(--vvh, var(--vh, 1vh)) * 100);
-}
-/* version badge: never overlap buttons */
-.verBadge{
-  left: calc(var(--safe-left) + 12px) !important;
-  right: auto !important;
-  bottom: calc(var(--safe-bottom) + 10px) !important;
-  z-index: 9999 !important;
-  pointer-events: none;
-}
-
-/* Menu title text (ドレミ/コード) : prevent top clipping */
-.menu-text .title{
-  line-height: 1.25 !important;
-  padding-top: 2px !important;
-}
-.menu-text small{ line-height: 1.2 !important; }
-.menu-btn{ overflow: visible !important; }
-/* Emoji badges: avoid 'white on white' on iOS text emoji */
-.badge{
-  color: #1b1b1b !important;
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif;
-}
-/* HUD chord name: keep visible under Safari bars */
-#chordHud{
-  top: calc(var(--safe-top) + 10px) !important;
-}
-/* Stop button: keep within safe area */
-#stopBtn, .stopBtn, #btnStop{
-  right: calc(var(--safe-right) + 14px) !important;
-  bottom: calc(var(--safe-bottom) + 14px) !important;
-}
-/* Emoji font fallback (iOS/Android) */
-.badge, .kids-mascot, .emoji{
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif !important;
-  font-variant-emoji: emoji;
-}
-/* Disable bubble circles (look like white rings on iPhone) */
-body::before{ display:none !important; background:none !important; }
-/* Menu title: avoid iOS top-clipping */
-.menu-text{ padding-top: 2px; }
-.menu-text .title{ line-height: 1.28 !important; padding-top: 4px !important; }
-@media (max-height: 430px){
-  .menu-btn{ padding-top: 14px; padding-bottom: 14px; }
-  .menu-text .title{ padding-top: 5px !important; }
-}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
+</head>
 <body>
+
 <div id="app">
-<div id="menu-overlay">
-<div class="menu-card">
-<h1 style="margin-bottom: 2px;">🪕 ゲームメニュー</h1>
-<div class="menu-list" style="display:flex; flex-direction:column; gap:8px;">
-<button class="menu-btn mode1" onclick="prepGame('scale')">
-<div class="badge">🐤</div>
-<div class="menu-text"><div class="title">ドレミファソラシド</div><small>だんだん速くなるよ</small></div>
-</button>
-<button class="menu-btn mode2" onclick="prepGame('easy')">
-<div class="badge">🐱</div>
-<div class="menu-text"><div class="title">コード かんたん</div><small>C / F / G7 / Am</small></div>
-</button>
-<button class="menu-btn mode3" onclick="prepGame('hard')">
-<div class="badge">🐼</div>
-<div class="menu-text"><div class="title">コード ちょいむず</div><small>いろいろなコード</small></div>
-</button>
-<button class="menu-btn mode4" onclick="prepGame('song')">
-<div class="badge">🦁</div>
-<div class="menu-text"><div class="title">曲：きらきら星</div><small>メロディ＋コード</small></div>
-</button>
+  <div id="menu-overlay">
+    <div class="menu-card">
+      <h1 style="margin-bottom: 2px;">🪕 ゲームメニュー</h1>
+      
+      <div class="menu-list" style="display:flex; flex-direction:column; gap:8px;">
+        <button class="menu-btn mode1" onclick="prepGame('scale')">
+          <div class="badge">🐤</div>
+          <div class="menu-text"><div class="title">ドレミファソラシド</div><small>だんだん速くなるよ</small></div>
+        </button>
+        <button class="menu-btn mode2" onclick="prepGame('easy')">
+          <div class="badge">🐱</div>
+          <div class="menu-text"><div class="title">コード かんたん</div><small>C / F / G7 / Am</small></div>
+        </button>
+        <button class="menu-btn mode3" onclick="prepGame('hard')">
+          <div class="badge">🐼</div>
+          <div class="menu-text"><div class="title">コード ちょいむず</div><small>いろいろなコード</small></div>
+        </button>
+        <button class="menu-btn mode4" onclick="prepGame('song')">
+          <div class="badge">🦁</div>
+          <div class="menu-text"><div class="title">曲：きらきら星</div><small>メロディ＋コード</small></div>
+        </button>
+      </div>
+
+      <div class="mode-select">
+        <div class="mode-pills">
+          <div class="mode-pill" onclick="setMode(this, 'NORMAL')">ノーマル</div>
+          <div class="mode-pill active" onclick="setMode(this, 'WAIT')">まちモード</div>
+          <div class="mode-pill" onclick="setMode(this, 'TAP')">タップモード</div>
+        </div>
+      </div>
+      
+      <button class="action-btn btn-secondary" onclick="location.href='index.html'" style="margin-top:10px;">🏝️ TOPへもどる</button>
+    </div>
+  </div>
+
+  <div id="screenFlash"></div>
+  <div id="fxMsg"></div>
+  <div id="comboBig"></div>
+
+  <div id="lyrics-area"></div>
+  <div id="combo-panel"><div class="t1">COMBO</div><div class="t2"><span id="comboNum">0</span> 連続</div></div>
+  <div id="score-panel">⭐ <span id="score">0</span></div>
+  <div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
+  <div id="chordHud" aria-hidden="true"></div>
+  
+  <div id="back-btn"><button onclick="goMenu()">🏝️ メニュー</button></div>
+  <button id="stopBtn" type="button">ストップ</button>
+
+  <div id="loading-overlay" class="overlay-card">
+    <div class="card-content">
+      <h2>マイクじゅんび中...</h2>
+      <p id="loading-msg">静かにしてね（ノイズをはかっています）</p>
+    </div>
+  </div>
+
+  <div id="pause-overlay" class="overlay-card">
+    <div class="card-content">
+      <h2>ストップ中</h2>
+      <button class="action-btn btn-primary" onclick="resumeGame()">つづける</button>
+      <button class="action-btn btn-secondary" onclick="goMenu()">メニューへ</button>
+    </div>
+  </div>
+
+  <div id="result-overlay" class="overlay-card">
+    <div class="card-content">
+      <h2>Finish!</h2>
+      <div class="result-score">⭐ <span id="result-score">0</span> pts</div>
+      <p id="result-msg">Good Job!</p>
+      <button class="action-btn btn-primary" onclick="restartLast()">もう１回</button>
+      <button class="action-btn btn-secondary" onclick="goMenu()">メニュー</button>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
 </div>
-<div class="mode-select">
-<div class="mode-pills">
-<div class="mode-pill" data-mode="NORMAL" onclick="setMode(this, 'NORMAL')">ノーマル</div>
-<div class="mode-pill active" data-mode="WAIT" onclick="setMode(this, 'WAIT')">まちモード</div>
-<div class="mode-pill" data-mode="TAP" onclick="setMode(this, 'TAP')">タップモード</div>
-</div>
-</div>
-<button class="action-btn btn-secondary" onclick="location.href='index.html'" style="margin-top:10px;">🏝️ TOPへもどる</button>
-</div>
-</div>
-<div id="screenFlash"></div>
-<div id="fxMsg"></div>
-<div id="comboBig"></div>
-<div id="lyrics-area"></div>
-<div id="combo-panel"><div class="t1">COMBO</div><div class="t2"><span id="comboNum">0</span> 連続</div></div>
-<div id="score-panel">⭐ <span id="score">0</span></div>
-<div id="timer-panel">のこり <span id="timer">60</span> 秒</div>
-<div aria-hidden="true" id="chordHud"></div>
-<div id="back-btn"><button onclick="goMenu()">🏝️ さいしょに もどる</button></div>
-<button id="stopBtn" type="button">ちょっと まって</button>
-<div class="overlay-card" id="loading-overlay">
-<div class="card-content">
-<h2>マイクじゅんび中...</h2>
-<p id="loading-msg">静かにしてね（ノイズをはかっています）</p>
-</div>
-</div>
-<div class="overlay-card" id="pause-overlay">
-<div class="card-content">
-<h2>ちょっと まって中</h2>
-<button class="action-btn btn-primary" onclick="resumeGame()">つづける</button>
-<button class="action-btn btn-secondary" onclick="goMenu()">メニューへ</button>
-</div>
-</div>
-<div class="overlay-card" id="result-overlay">
-<div class="card-content">
-<h2>Finish!</h2>
-<div class="result-score">⭐ <span id="result-score">0</span> pts</div>
-<p id="result-msg">Good Job!</p>
-<button class="action-btn btn-primary" onclick="restartLast()">もう１回</button>
-<button class="action-btn btn-secondary" onclick="goMenu()">メニュー</button>
-</div>
-</div>
-<canvas id="gameCanvas"></canvas>
-</div>
+
 <script>
 // ===== 基本設定 =====
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -460,59 +337,6 @@ let playMode = 'WAIT';
 let audioCtx = null;
 let micStream = null;
 let micAnalyser = null;
-
-// ---- チューニング結果（判定閾値）を読む ----
-const THRESH_KEY = 'uk_game_thresholds_v1';
-const THRESH_MAX_AGE_H = 24; // 24時間
-function loadGameThresholds(){
-  try{
-    const raw = localStorage.getItem(THRESH_KEY);
-    if(!raw) return null;
-    const o = JSON.parse(raw);
-    if(!o || typeof o !== 'object') return null;
-    if(!o.updatedAt) return null;
-    const ageH = (Date.now() - Number(o.updatedAt)) / 3600000;
-    if(!(ageH >= 0) || ageH > THRESH_MAX_AGE_H) return null;
-    return o;
-  }catch(e){ return null; }
-}
-async function measureNoiseRms(durationMs=900, stepMs=90){
-  if(!micAnalyser) return 0;
-  const buf = new Float32Array(micAnalyser.fftSize);
-  const samples = [];
-  const end = performance.now() + durationMs;
-  while(performance.now() < end){
-    micAnalyser.getFloatTimeDomainData(buf);
-    let s=0; for(let i=0;i<buf.length;i++) s += buf[i]*buf[i];
-    samples.push(Math.sqrt(s/buf.length));
-    await new Promise(r=>setTimeout(r, stepMs));
-  }
-  samples.sort((a,b)=>a-b);
-  const idx = Math.max(0, Math.min(samples.length-1, Math.floor(samples.length*0.85)));
-  return samples[idx] ?? (samples[samples.length-1] ?? 0);
-}
-function applyThresholdsFrom(noise, stored){
-  let rise = 0, high = 0;
-  if(stored && typeof stored.pluckRiseRms === 'number' && typeof stored.pluckHighRms === 'number'){
-    const baseNoise = (typeof stored.noiseRms==='number' && stored.noiseRms>0) ? stored.noiseRms : noise;
-    const k = baseNoise>0 ? (noise/baseNoise) : 1;
-    rise = stored.pluckRiseRms * k;
-    high = stored.pluckHighRms * k;
-  }
-  // 最低ライン（端末別）
-  if(IS_IOS){
-    rise = Math.max(rise||0, 0.0016, noise*2.0);
-    high = Math.max(high||0, 0.0020, noise*3.0);
-  } else {
-    rise = Math.max(rise||0, 0.010,  noise*2.0);
-    high = Math.max(high||0, 0.012,  noise*3.0);
-  }
-  if(high < noise*2.4) high = noise*2.4;
-  if(rise > high*0.9) rise = high*0.6;
-  PLUCK_RISE_RMS = rise;
-  PLUCK_HIGH_RMS = high;
-}
-
 let prevRms = 0;
 let pluckHoldCount = 0;
 let ignorePluckUntil = 0;
@@ -549,24 +373,9 @@ let speedLevel = 0;
   updateComboUI();
   const big=document.getElementById('comboBig'); if(big) big.style.display='none';
 let currentScrollSpeed = 3.5;
-const SPEED_UP_EVERY = 5;    
-const SPEED_STEP = 0.75; // +0.75 per 5 HIT (was ~0.5)
-// 5連続で加速
-
-function _resetSpe_resetSpe_resetSpeedState(){
-  // UI/flow only: ensure speed/combos don't carry across modes
-  try{
-    speedLevel = 0;
-    currentScrollSpeed = baseScrollSpeed;
-    scrollSpeed = baseScrollSpeed;
-    combo = 0;
-    maxCombo = 0;
-    // clear lingering messages
-    showMsg('');
-  }catch(e){}
-}
-
-const SPEED_MAX_ADD = 1.75; // cap: base 3.5 -> 5.25 (x1.5)
+const SPEED_UP_EVERY = 5;    // 5連続で加速
+const SPEED_STEP = 0.375;   // 1段階の加速量（×1.5）
+const SPEED_MAX_ADD = 2.25; // 上限（×1.5）
 
 let _fxTimer = 0;
 const CHEER_PHRASES = ['その調子！','いいぞ！','ノってる！','キター！','最高！','つづけ！','いける！'];
@@ -597,7 +406,7 @@ function showFx(text, kind, opts = {}){
   }, opts.durationMs || 980);
 }
 
-function resetSpe_resetSpe_resetSpeedState(){
+function resetSpeedState(){
   comboStreak = 0;
   speedLevel = 0;
   currentScrollSpeed = baseScrollSpeed;
@@ -629,14 +438,14 @@ const CHORD_LIB = {
   'D7': { name: 'D7', targetIdx: 0, fingers: [{s: 2, f: 2, txt: '中'}, {s: 3, f: 2, txt: '薬'}, {s: 4, f: 2, txt: '人'}] }
 };
 const SOLO_LIB = {
-  'do':  { name:'ド', targetIdx:0, fingers:[{s:3,f:0,txt:'0'}]},
-  're':  { name:'レ', targetIdx:0, fingers:[{s:3,f:2,txt:'中'}]},
-  'mi':  { name:'ミ', targetIdx:0, fingers:[{s:2,f:0,txt:'0'}]},
-  'fa':  { name:'ファ', targetIdx:0, fingers:[{s:2,f:1,txt:'人'}]},
-  'so':  { name:'ソ', targetIdx:0, fingers:[{s:2,f:3,txt:'薬'}]},
-  'la':  { name:'ラ', targetIdx:0, fingers:[{s:1,f:0,txt:'0'}]},
-  'si':  { name:'シ', targetIdx:0, fingers:[{s:1,f:2,txt:'中'}]},
-  'do2': { name:'ド', targetIdx:0, fingers:[{s:1,f:3,txt:'薬'}]}
+  'do':  { name:'', targetIdx:0, fingers:[{s:3,f:0,txt:'0'}]},
+  're':  { name:'', targetIdx:0, fingers:[{s:3,f:2,txt:'中'}]},
+  'mi':  { name:'', targetIdx:0, fingers:[{s:2,f:0,txt:'0'}]},
+  'fa':  { name:'', targetIdx:0, fingers:[{s:2,f:1,txt:'人'}]},
+  'so':  { name:'', targetIdx:0, fingers:[{s:2,f:3,txt:'薬'}]},
+  'la':  { name:'', targetIdx:0, fingers:[{s:1,f:0,txt:'0'}]},
+  'si':  { name:'', targetIdx:0, fingers:[{s:1,f:2,txt:'中'}]},
+  'do2': { name:'', targetIdx:0, fingers:[{s:1,f:3,txt:'薬'}]}
 };
 const SONG_DATA = [
   {lib:CHORD_LIB,key:'C',lyrics:"きら"},{lib:SOLO_LIB,key:'do',lyrics:""},
@@ -657,27 +466,15 @@ let lastStartParams = null; // リトライ用
 // --- UI操作 ---
 function setMode(el, mode){
   playMode = mode;
-  document.querySelectorAll('.mode-pill').forEach(b => {
-    const m = b.getAttribute('data-mode') || '';
-    b.classList.toggle('active', m === mode);
-  });
+  document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
 }
-
-// URLパラメータ mode=TAP/NORMAL/WAIT を反映
-(function applyModeFromQuery(){
-  try{
-    const p = new URLSearchParams(location.search);
-    const m = (p.get('mode')||'').toUpperCase();
-    if(m==='TAP' || m==='NORMAL' || m==='WAIT'){
-      setMode(null, m);
-    }
-  }catch(e){}
-})();
-
 
 // ★修正: メニューへ戻る動作（TOPではなくゲームメニューに戻る）
 function goMenu(){
-  if(rafId) cancelAnimationFrame(rafId);
+  
+  try{ resetSpeedState(); }catch(e){}
+if(rafId) cancelAnimationFrame(rafId);
   gameState = 'MENU';
   
   // UIリセット
@@ -693,7 +490,7 @@ function goMenu(){
   
   // キャンバスクリア
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  resetSpe_resetSpe_resetSpeedState();
+  resetSpeedState();
   const fx=document.getElementById('fxMsg'); if(fx){ fx.style.display='none'; fx.className=''; }
 }
 
@@ -710,8 +507,9 @@ function resumeGame(){
 }
 
 // --- ゲーム開始フロー ---
-async function prepGame
-  _resetSpe_resetSpe_resetSpeedState();
+async function prepGame(type){
+  
+  try{ resetSpeedState(); }catch(e){}
 // タップモードならマイク不要
   if(playMode === 'TAP'){ startGameByType(type); return; }
 
@@ -732,16 +530,23 @@ async function prepGame
       micAnalyser.fftSize = IS_IOS ? 4096 : 2048;
       src.connect(gain).connect(micAnalyser);
     }
-
-    // チューニング結果（あれば）
-    const stored = loadGameThresholds();
-
-    // ノイズ計測（約1秒）
-    await new Promise(r => setTimeout(r, 200)); // 立ち上がり待ち
-    NOISE_RMS = await measureNoiseRms(950, 95);
-
-    // 閾値：チューニング結果を基本に、今のノイズ床で補正
-    applyThresholdsFrom(NOISE_RMS, stored);
+    
+    // ノイズ計測 (1秒)
+    await new Promise(r => setTimeout(r, 1000));
+    // 簡易キャリブレーション（現在値をノイズ床とする）
+    const buf = new Float32Array(micAnalyser.fftSize);
+    micAnalyser.getFloatTimeDomainData(buf);
+    let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
+    NOISE_RMS = Math.sqrt(rms/buf.length);
+    
+    // 閾値設定
+    if(IS_IOS){
+      PLUCK_RISE_RMS = Math.max(0.0016, NOISE_RMS * 2.0);
+      PLUCK_HIGH_RMS = Math.max(0.0020, NOISE_RMS * 3.0);
+    } else {
+      PLUCK_RISE_RMS = Math.max(0.010, NOISE_RMS * 2.0);
+      PLUCK_HIGH_RMS = Math.max(0.012, NOISE_RMS * 3.0);
+    }
 
     document.getElementById('loading-overlay').style.display = 'none';
     startGameByType(type);
@@ -755,10 +560,8 @@ async function prepGame
 }
 
 function startGameByType(type){
-  
-  _resetSpe_resetSpeedState();
-lastStartParams = type;
-  if(type==='scale') initGame('scale', null, {speedBase:3.4});
+  lastStartParams = type;
+  if(type==='scale') initGame('scale', null, {speedBase:3.4, interval:2000});
   else if(type==='easy') initGame('practice', ['C','F','G7','Am'], {speedBase:3.2});
   else if(type==='hard') initGame('practice', ['C','F','G7','Am','G','A7','Dm','Em','D7'], {speedBase:3.35});
   else if(type==='song') initGame('song', 'きらきら星', {speedBase:3.45});
@@ -787,7 +590,7 @@ function initGame(mode, levelData, opts){
   baseScrollSpeed = opts.speedBase || 3.5;
   currentScrollSpeed = baseScrollSpeed;
   scrollSpeed = currentScrollSpeed;
-  resetSpe_resetSpe_resetSpeedState();
+  resetSpeedState();
   gameMode = mode;
   isSongMode = (mode==='song');
   currentLevelChords = levelData || [];
@@ -1033,7 +836,7 @@ function drawCircle(x,y,txt,size,alpha,blur,scale=1){
   ctx.fillStyle = (txt==='薬')?'#5271ff':(txt==='中'?'#ff66c4':(txt==='人'?'#ff914d':'#888'));
   ctx.fill(); ctx.strokeStyle="#fff"; ctx.lineWidth=4; ctx.stroke();
   ctx.filter="none"; ctx.fillStyle="#fff"; ctx.font=`bold ${size*0.75}px sans-serif`;
-  ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(txt,0,2);
+  ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(txt,0,6);
   ctx.restore();
 }
 class Star {
@@ -1094,10 +897,9 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 
 })();
 </script>
+
 <div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
 game_iphone_fix_v11
 </div>
-
-<div class="verBadge">kids_ui_v3</div>
 </body>
 </html>

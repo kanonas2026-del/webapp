@@ -1,25 +1,26 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ウクレレであそぼう</title>
 <style>
-  :root{ --vvh: 1vh; --vvTop: 0px;  --vh: 1vh; }
+  :root{ --vh: 1vh; }
 
   html, body {
-    margin: 0; padding: 0;
-    width: 100%;
-    height: calc(var(--vvh, 1vh) * 100);
-    height: calc(var(--vh) * 100);
-    overflow: hidden;
-    position: fixed;
-    background: #f4f9ff;
-    font-family: "Hiragino Sans", "Arial", sans-serif;
-    touch-action: none;
-  }
-  body { display: flex; justify-content: center; align-items: center; }
+  margin: 0; padding: 0;
+  width: 100%;
+  /* iPhone/iPad SafariのUIバー出入りで崩れない高さ（visualViewport基準） */
+  height: 100dvh;
+  height: calc(var(--vh) * 100);
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  background: #f4f9ff;
+  font-family: ui-rounded, "Hiragino Maru Gothic ProN", "Hiragino Sans", "Arial", sans-serif;
+  touch-action: none;
+}
+body { display: flex; justify-content: center; align-items: center; }
 
   /* タイトル */
   .title {
@@ -49,268 +50,92 @@
 
   /* 背景アニメーション */
   .palm-wrap {
-    width: 100vw; height: calc(var(--vvh, 1vh) * 100);
+    width: 100vw; height: 100dvh; height: calc(var(--vh) * 100);
     animation: palm-sway 12s ease-in-out infinite;
     transform-origin: 35% 90%;
     pointer-events: none;
   }
-  svg { width: 100vw; height: calc(var(--vvh, 1vh) * 100); transform: translateX(-22vw); }
+  svg { width: 100vw; height: 100dvh; height: calc(var(--vh) * 100); transform: translateX(-22vw); }
   @keyframes palm-sway {
     0%,100% { transform: rotate(-0.8deg); }
     50%     { transform: rotate(0.8deg); }
   }
 
-
-  /* ===== 追加: はじめて/中級 + チューニング誘導（スクロールなし） ===== */
-  .overlay {
-    position: fixed; inset: 0; z-index: 999;
-    display: none; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(2px);
-  }
-  .overlay.show { display: flex; }
-  .card {
-    width: min(560px, 92vw);
-    background: rgba(255,255,255,0.96);
-    border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
-    padding: 16px;
-    color: #222;
-  }
-  .card h2 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    letter-spacing: 0.04em;
-  }
-  .card p { margin: 6px 0 0; font-size: 13px; line-height: 1.4; opacity: 0.9; }
-  .choiceRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-  .choiceBtn {
-    border: 2px solid rgba(0,0,0,0.10);
-    border-radius: 14px;
-    padding: 12px;
-    background: #fff;
-    font-weight: 900;
-    font-size: 15px;
-    cursor: pointer;
-    text-align: left;
-    box-shadow: 0 4px 0 rgba(122,177,204,0.20);
-  }
-  .choiceBtn:active { transform: translateY(1px); box-shadow: none; }
-  .choiceBtn .sub { display:block; font-weight: 700; font-size: 12px; opacity: 0.85; margin-top: 4px; }
-
-  .actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
-  .actionBtn {
-    border: none; border-radius: 14px; padding: 12px 14px;
-    font-weight: 900; font-size: 16px; cursor: pointer;
-    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
-  }
-  .actionPrimary { background: #eef6ff; color: #234; border: 2px solid #c9ddff; }
-  .actionSecondary { background: #fff; color: #333; border: 2px solid #e6e6e6; }
-  .actionSecondary small { display:block; font-size: 12px; opacity: 0.78; margin-top: 4px; font-weight: 800; }
-
-  .tinyNote { margin-top: 10px; font-size: 12px; opacity: 0.78; }
-
-  .version-badge{
-    position: fixed; left: 10px; bottom: 10px; z-index: 20;
-    font-size: 11px; font-weight: 800; color: #234;
-    background: rgba(255,255,255,0.72);
-    border: 1px solid rgba(0,0,0,0.08);
-    padding: 4px 8px; border-radius: 10px;
+  /* かわいいマスコット（絵文字じゃなくSVGで安定表示） */
+  .mascot{
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 10px);
+    left: 10px;
+    width: 74px;
+    height: 74px;
+    z-index: 5;
     pointer-events: none;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+    animation: floaty 2.6s ease-in-out infinite;
   }
+  @keyframes floaty{ 0%,100%{ transform: translateY(0) rotate(-3deg);} 50%{ transform: translateY(-7px) rotate(3deg);} }
 
-
-  .verBadge{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);right:auto;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;pointer-events:none;}
-
-
-/* === KIDS UI THEME (SAFE: style/text only) ========================= */
-:root{
-  --kids-font: "M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Arial",sans-serif;
-  --kids-ink: #2b2017;
-  --kids-white: rgba(255,255,255,0.96);
-  --kids-shadow: 0 10px 0 rgba(0,0,0,0.10), 0 18px 26px rgba(0,0,0,0.18);
-}
-
-/* font */
-body, button, input, select, textarea { font-family: var(--kids-font) !important; }
-
-/* soft playful background (lightweight) */
-body::before{
-  content:"";
-  position:fixed; inset:0;
-  pointer-events:none;
-  background-image:
-    radial-gradient(circle at 12% 22%, rgba(255,255,255,0.55) 0 14px, transparent 15px),
-    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.45) 0 10px, transparent 11px),
-    radial-gradient(circle at 40% 82%, rgba(255,255,255,0.40) 0 12px, transparent 13px),
-    radial-gradient(circle at 90% 76%, rgba(255,255,255,0.35) 0 9px, transparent 10px);
-  opacity: 0.75;
-  mix-blend-mode: soft-light;
-}
-
-/* version badge: move away from buttons */
-.verBadge{
-  left: calc(10px + env(safe-area-inset-left)) !important;
-  right: auto !important;
-  bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-  font-size: 12px !important;
-  border-radius: 14px !important;
-}
-
-/* index-specific */
-body { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%) !important; }
-
-.kids-mascot{
-  font-size: 72px;
-  line-height: 1;
-  filter: drop-shadow(0 10px 0 rgba(0,0,0,0.10));
-  transform-origin: bottom center;
-  animation: kidsWiggle 3s ease-in-out infinite;
-  margin-bottom: 6px;
-}
-@keyframes kidsWiggle{ 0%,100%{ transform: rotate(-6deg);} 50%{ transform: rotate(6deg);} }
-
-.menu button, .gateButtons button{
-  border: 4px solid #fff !important;
-  border-radius: 28px !important;
-  box-shadow: var(--kids-shadow) !important;
-  font-weight: 900 !important;
-  color: #fff !important;
-  padding: 14px 18px !important;
-  text-align: left !important;
-}
-.menu button:active, .gateButtons button:active{
-  transform: translateY(6px) !important;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.12), 0 6px 10px rgba(0,0,0,0.12) !important;
-}
-#btn-start{ background: linear-gradient(to bottom, #ff9a44, #fc6076) !important; }
-#btn-tuning{ background: linear-gradient(to bottom, #4facfe, #00f2fe) !important; }
-#btn-help{ background: linear-gradient(to bottom, #43e97b, #38f9d7) !important; color: #1d5a41 !important; text-shadow:none !important; }
-
-.title, .subtitle, .subTitle, .desc{
-  color: var(--kids-ink) !important;
-}
-
-/* === KIDS_UI_OVERRIDES === */
-:root{
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-/* Use real viewport height on iOS */
-html, body{
-  height: calc(var(--vvh, var(--vh, 1vh)) * 100);
-}
-/* version badge: never overlap buttons */
-.verBadge{
-  left: calc(var(--safe-left) + 12px) !important;
-  right: auto !important;
-  bottom: calc(var(--safe-bottom) + 10px) !important;
-  z-index: 9999 !important;
-  pointer-events: none;
-}
-
-/* Mascot: visible & natural (no clipping) */
-.kids-mascot-wrap{
-  position: fixed;
-  left: calc(var(--safe-left) + 10px);
-  top: calc(var(--safe-top) + 12px);
-  z-index: 220;
-  pointer-events: none;
-}
-.kids-mascot{
-  font-size: 54px !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-  filter: drop-shadow(0 10px 0 rgba(0,0,0,0.12));
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif;
-  animation: kidsWiggle 3.2s ease-in-out infinite;
-}
-/* Avoid mascot going outside on small screens */
-@media (max-width: 480px){
-  .kids-mascot{ font-size: 48px !important; }
-}
-/* Keep layout clean */
-/* Emoji font fallback (iOS/Android) */
-.badge, .kids-mascot, .emoji{
-  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif !important;
-  font-variant-emoji: emoji;
-}
-/* Disable bubble circles (look like white rings on iPhone) */
-body::before{ display:none !important; background:none !important; }
-/* Panda sticker (SVG) - stable across devices */
-.kids-mascot{
-  width:84px;height:84px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><defs><filter id='s' x='-20%25' y='-20%25' width='140%25' height='140%25'><feDropShadow dx='0' dy='10' stdDeviation='0' flood-color='rgba(0,0,0,0.15)'/></filter></defs><g filter='url(%23s)'><circle cx='70' cy='74' r='46' fill='%23fff'/><circle cx='40' cy='44' r='18' fill='%23222'/><circle cx='100' cy='44' r='18' fill='%23222'/><circle cx='70' cy='74' r='46' fill='none' stroke='%23fff' stroke-width='10'/><ellipse cx='54' cy='74' rx='14' ry='18' fill='%23222' opacity='0.9'/><ellipse cx='86' cy='74' rx='14' ry='18' fill='%23222' opacity='0.9'/><circle cx='54' cy='74' r='6' fill='%23fff'/><circle cx='86' cy='74' r='6' fill='%23fff'/><circle cx='70' cy='90' r='6' fill='%23222'/><path d='M62 100c6 7 10 7 16 0' stroke='%23222' stroke-width='6' fill='none' stroke-linecap='round'/></g></svg>");
-  background-size:cover;
-  background-repeat:no-repeat;
-  position:fixed;
-  left:calc(env(safe-area-inset-left) + 10px);
-  top:calc(env(safe-area-inset-top) + 18px);
-  z-index:12;
-  animation: none !important;
-  filter:none !important;
-}
-/* Keep mascot fully visible */
-.kids-mascot{
-  transform: none !important;
-}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
-<body><div class="kids-mascot-wrap"><div aria-hidden="true" class="kids-mascot">🐼</div></div>
-<div class="title">ウクレレであそぼう</div>
-<div class="menu">
-<button class="primary" id="btn-start" onclick="startFlow()">🎮 ゲームで あそぶ</button>
-<button id="btn-tuning" onclick="location.href='tuning.html'">🪕 おとの じゅんび</button>
-<button id="btn-help" onclick="alert('音に合わせて画面をタップしたり、実際にウクレレを弾いて遊ぶゲームです！')">❓ あそびかた</button>
-</div>
-<div class="palm-wrap">
-<svg aria-hidden="true" preserveaspectratio="xMidYMid meet" viewbox="0 0 800 600">
-<ellipse cx="400" cy="500" fill="#cfeeb0" rx="260" ry="60"></ellipse>
-<path d="M360 480 C300 360, 340 260, 330 160 C320 80, 300 40, 280 20 L320 20 C360 60, 380 120, 390 200 C400 300, 380 380, 420 480 Z" fill="#7a4a21"></path>
-<path d="M310 350 Q350 340 380 330" fill="none" stroke="#d8b04c" stroke-width="8"></path>
-<path d="M300 300 Q340 290 370 280" fill="none" stroke="#d8b04c" stroke-width="8"></path>
-<path d="M295 250 Q330 240 360 230" fill="none" stroke="#d8b04c" stroke-width="8"></path>
-<g fill="#6aaa1f">
-<path d="M330 40 C180 20, 60 120, 40 200"></path>
-<path d="M330 40 C200 0, 120 40, 90 100"></path>
-<path d="M330 40 C460 20, 580 120, 620 220"></path>
-<path d="M330 40 C480 0, 620 40, 660 120"></path>
-<path d="M330 50 C310 10, 330 0, 350 -20"></path>
-</g>
-<circle cx="340" cy="60" fill="#c8b04a" r="18"></circle>
-<circle cx="365" cy="65" fill="#c8b04a" r="18"></circle>
-<g transform="translate(440 420) rotate(-15)">
-<ellipse cx="50" cy="80" fill="#c68642" rx="45" ry="60"></ellipse>
-<ellipse cx="50" cy="80" fill="#5a3a1a" rx="12" ry="16"></ellipse>
-<rect fill="#b5651d" height="70" width="12" x="44" y="10"></rect>
-<rect fill="#d79a3a" height="20" rx="5" width="40" x="30" y="-20"></rect>
-<line stroke="#ffffff" stroke-width="2" x1="48" x2="48" y1="10" y2="150"></line>
-<line stroke="#ffffff" stroke-width="2" x1="52" x2="52" y1="10" y2="150"></line>
-</g>
+</head>
+<body>
+
+<div class="mascot" aria-hidden="true">
+<svg viewBox="0 0 120 120" width="74" height="74">
+  <defs>
+    <radialGradient id="g" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f0f4ff"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#g)" stroke="#ffffff" stroke-width="6"/>
+  <circle cx="34" cy="34" r="18" fill="#2b2b2b"/>
+  <circle cx="86" cy="34" r="18" fill="#2b2b2b"/>
+  <circle cx="60" cy="64" r="38" fill="#ffffff"/>
+  <ellipse cx="45" cy="62" rx="14" ry="18" fill="#2b2b2b" opacity="0.9"/>
+  <ellipse cx="75" cy="62" rx="14" ry="18" fill="#2b2b2b" opacity="0.9"/>
+  <circle cx="45" cy="62" r="6" fill="#ffffff"/>
+  <circle cx="75" cy="62" r="6" fill="#ffffff"/>
+  <ellipse cx="60" cy="78" rx="10" ry="7" fill="#2b2b2b"/>
+  <path d="M52 86 Q60 92 68 86" stroke="#2b2b2b" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="46" cy="88" r="6" fill="#ffb4c8" opacity="0.85"/>
+  <circle cx="74" cy="88" r="6" fill="#ffb4c8" opacity="0.85"/>
 </svg>
 </div>
-<div aria-hidden="true" class="overlay" id="levelOverlay">
-<div class="card">
-<h2>どっちで あそぶ？</h2>
-<p>はじめての人は「はじめて（初級）」がおすすめ。</p>
-<div class="choiceRow">
-<button class="choiceBtn" onclick="chooseLevel('beginner')">① はじめて（初級）<span class="sub">ゆっくり・やさしめ</span></button>
-<button class="choiceBtn" onclick="chooseLevel('intermediate')">② だいたい わかる（中級）<span class="sub">ふつうのスピード</span></button>
+
+
+<div class="title">ウクレレであそぼう</div>
+
+<div class="menu">
+  <button id="btn-start" class="primary" onclick="location.href='game.html'">▶ はじめる</button>
+  <button id="btn-tuning" onclick="location.href='tuning.html'">🎵 チューニング</button>
+  <button id="btn-help" onclick="alert('音に合わせて画面をタップしたり、実際にウクレレを弾いて遊ぶゲームです！')">？ つかいかた</button>
 </div>
-<div class="tinyNote">※あとで変更できます（TOP画面で選び直し）</div>
-</div>
-</div>
-<div aria-hidden="true" class="overlay" id="gateOverlay">
-<div class="card">
-<h2>ゲームのまえに、チューニングしよう</h2>
-<p>チューニングすると、あなたの音に合わせて「HITの判定」を調整できます。</p>
-<div class="actions">
-<button class="actionBtn actionPrimary" onclick="goTuning()">🪕 チューニングしてからゲーム</button>
-<button class="actionBtn actionSecondary" onclick="goGameTap()">🪕 まずはタップで あそぶ<small>（マイクなしでもOK）</small></button>
-</div>
-</div>
+
+<div class="palm-wrap">
+<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+  <ellipse cx="400" cy="500" rx="260" ry="60" fill="#cfeeb0"/>
+  <path d="M360 480 C300 360, 340 260, 330 160 C320 80, 300 40, 280 20 L320 20 C360 60, 380 120, 390 200 C400 300, 380 380, 420 480 Z" fill="#7a4a21"/>
+  <path d="M310 350 Q350 340 380 330" stroke="#d8b04c" stroke-width="8" fill="none"/>
+  <path d="M300 300 Q340 290 370 280" stroke="#d8b04c" stroke-width="8" fill="none"/>
+  <path d="M295 250 Q330 240 360 230" stroke="#d8b04c" stroke-width="8" fill="none"/>
+  <g fill="#6aaa1f">
+    <path d="M330 40 C180 20, 60 120, 40 200"/>
+    <path d="M330 40 C200 0, 120 40, 90 100"/>
+    <path d="M330 40 C460 20, 580 120, 620 220"/>
+    <path d="M330 40 C480 0, 620 40, 660 120"/>
+    <path d="M330 50 C310 10, 330 0, 350 -20"/>
+  </g>
+  <circle cx="340" cy="60" r="18" fill="#c8b04a"/>
+  <circle cx="365" cy="65" r="18" fill="#c8b04a"/>
+  <g transform="translate(440 420) rotate(-15)">
+    <ellipse cx="50" cy="80" rx="45" ry="60" fill="#c68642"/>
+    <ellipse cx="50" cy="80" rx="12" ry="16" fill="#5a3a1a"/>
+    <rect x="44" y="10" width="12" height="70" fill="#b5651d"/>
+    <rect x="30" y="-20" width="40" height="20" rx="5" fill="#d79a3a"/>
+    <line x1="48" y1="10" x2="48" y2="150" stroke="#ffffff" stroke-width="2"/>
+    <line x1="52" y1="10" x2="52" y2="150" stroke="#ffffff" stroke-width="2"/>
+  </g>
+</svg>
 </div>
 
 <script>
@@ -327,65 +152,8 @@ body::before{ display:none !important; background:none !important; }
   }
   window.addEventListener('resize', setVh);
   window.addEventListener('orientationchange', () => setTimeout(setVh, 250));
-
-  const KEY_LEVEL = 'uk_level_v1';
-  const KEY_TUNING = 'uk_game_thresholds_v1';
-
-  function show(id){ document.getElementById(id).classList.add('show'); }
-  function hide(id){ document.getElementById(id).classList.remove('show'); }
-
-  window.chooseLevel = function(level){
-    try{ localStorage.setItem(KEY_LEVEL, level); }catch(e){}
-    hide('levelOverlay');
-    // レベル選択後はチューニング誘導へ
-    show('gateOverlay');
-  };
-
-  function getLevel(){
-    try{ return localStorage.getItem(KEY_LEVEL); }catch(e){ return null; }
-  }
-
-  function hasFreshTuning(){
-    try{
-      const raw = localStorage.getItem(KEY_TUNING);
-      if(!raw) return false;
-      const o = JSON.parse(raw);
-      if(!o || !o.ts) return false;
-      // 24時間以内なら「今日のチューニング」とみなす
-      return (Date.now() - Number(o.ts)) < 24*60*60*1000;
-    }catch(e){
-      return false;
-    }
-  }
-
-  window.startFlow = function(){
-    // まずレベルが未設定なら選んでもらう
-    const lv = getLevel();
-    if(!lv){ show('levelOverlay'); return; }
-
-    // ここは「半強制」方針：基本はチューニングへ誘導
-    // ただし、すでに今日チューニング済みなら gateOverlay は出さずゲームへ
-    if(hasFreshTuning()){
-      location.href = 'game.html';
-      return;
-    }
-    show('gateOverlay');
-  };
-
-  window.goTuning = function(){
-    hide('gateOverlay');
-    location.href = 'tuning.html?next=game';
-  };
-
-  window.goGameTap = function(){
-    hide('gateOverlay');
-    // まずはタップで遊べる導線
-    location.href = 'game.html?mode=TAP';
-  };
-
 })();
 </script>
 
-<div class="verBadge">kids_ui_v3</div>
 </body>
 </html>
