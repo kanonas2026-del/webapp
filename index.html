@@ -6,12 +6,12 @@
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <title>ウクレレであそぼう</title>
 <style>
-  :root{ --vh: 1vh; }
+  :root{ --vvh: 1vh; --vvTop: 0px;  --vh: 1vh; }
 
   html, body {
     margin: 0; padding: 0;
     width: 100%;
-    height: 100dvh;
+    height: calc(var(--vvh, 1vh) * 100);
     height: calc(var(--vh) * 100);
     overflow: hidden;
     position: fixed;
@@ -49,12 +49,12 @@
 
   /* 背景アニメーション */
   .palm-wrap {
-    width: 100vw; height: 100vh;
+    width: 100vw; height: calc(var(--vvh, 1vh) * 100);
     animation: palm-sway 12s ease-in-out infinite;
     transform-origin: 35% 90%;
     pointer-events: none;
   }
-  svg { width: 100vw; height: 100vh; transform: translateX(-22vw); }
+  svg { width: 100vw; height: calc(var(--vvh, 1vh) * 100); transform: translateX(-22vw); }
   @keyframes palm-sway {
     0%,100% { transform: rotate(-0.8deg); }
     50%     { transform: rotate(0.8deg); }
@@ -120,7 +120,7 @@
   }
 
 
-  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
+  .verBadge{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);right:auto;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;pointer-events:none;}
 
 
 /* === KIDS UI THEME (SAFE: style/text only) ========================= */
@@ -191,41 +191,74 @@ body { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%) !important;
   color: var(--kids-ink) !important;
 }
 
-
-
-
-/* === kids_ui_v2 iPhone fixes (CSS only / safe) === */
-
-html, body { height: 100%; }
-body{
-  min-height: calc(var(--vh, 1vh) * 100);
-  padding-top: calc(env(safe-area-inset-top) + 10px);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
-  overflow-x: hidden;
+/* === KIDS_UI_OVERRIDES === */
+:root{
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+/* Use real viewport height on iOS */
+html, body{
+  height: calc(var(--vvh, var(--vh, 1vh)) * 100);
+}
+/* version badge: never overlap buttons */
+.verBadge{
+  left: calc(var(--safe-left) + 12px) !important;
+  right: auto !important;
+  bottom: calc(var(--safe-bottom) + 10px) !important;
+  z-index: 9999 !important;
+  pointer-events: none;
 }
 
-/* 🐼が切れない＆不自然に見えないように（小さめ・中央寄せ・余白確保） */
+/* Mascot: visible & natural (no clipping) */
+.kids-mascot-wrap{
+  position: fixed;
+  left: calc(var(--safe-left) + 10px);
+  top: calc(var(--safe-top) + 12px);
+  z-index: 220;
+  pointer-events: none;
+}
 .kids-mascot{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  font-size: clamp(44px, 9vw, 62px);
-  padding: 8px 14px;
-  margin: 6px auto 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.55);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-  max-width: 92vw;
+  font-size: 54px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  filter: drop-shadow(0 10px 0 rgba(0,0,0,0.12));
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif;
+  animation: kidsWiggle 3.2s ease-in-out infinite;
 }
-
-@media (max-height: 420px){
-  .kids-mascot{ margin: 2px auto 6px; font-size: clamp(40px, 8vw, 56px); padding: 6px 12px; }
+/* Avoid mascot going outside on small screens */
+@media (max-width: 480px){
+  .kids-mascot{ font-size: 48px !important; }
 }
-
+/* Keep layout clean */
+/* Emoji font fallback (iOS/Android) */
+.badge, .kids-mascot, .emoji{
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif !important;
+  font-variant-emoji: emoji;
+}
+/* Disable bubble circles (look like white rings on iPhone) */
+body::before{ display:none !important; background:none !important; }
+/* Panda sticker (SVG) - stable across devices */
+.kids-mascot{
+  width:84px;height:84px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><defs><filter id='s' x='-20%25' y='-20%25' width='140%25' height='140%25'><feDropShadow dx='0' dy='10' stdDeviation='0' flood-color='rgba(0,0,0,0.15)'/></filter></defs><g filter='url(%23s)'><circle cx='70' cy='74' r='46' fill='%23fff'/><circle cx='40' cy='44' r='18' fill='%23222'/><circle cx='100' cy='44' r='18' fill='%23222'/><circle cx='70' cy='74' r='46' fill='none' stroke='%23fff' stroke-width='10'/><ellipse cx='54' cy='74' rx='14' ry='18' fill='%23222' opacity='0.9'/><ellipse cx='86' cy='74' rx='14' ry='18' fill='%23222' opacity='0.9'/><circle cx='54' cy='74' r='6' fill='%23fff'/><circle cx='86' cy='74' r='6' fill='%23fff'/><circle cx='70' cy='90' r='6' fill='%23222'/><path d='M62 100c6 7 10 7 16 0' stroke='%23222' stroke-width='6' fill='none' stroke-linecap='round'/></g></svg>");
+  background-size:cover;
+  background-repeat:no-repeat;
+  position:fixed;
+  left:calc(env(safe-area-inset-left) + 10px);
+  top:calc(env(safe-area-inset-top) + 18px);
+  z-index:12;
+  animation: none !important;
+  filter:none !important;
+}
+/* Keep mascot fully visible */
+.kids-mascot{
+  transform: none !important;
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
-<body><div aria-hidden="true" class="kids-mascot">🐼</div>
+<body><div class="kids-mascot-wrap"><div aria-hidden="true" class="kids-mascot">🐼</div></div>
 <div class="title">ウクレレであそぼう</div>
 <div class="menu">
 <button class="primary" id="btn-start" onclick="startFlow()">🎮 ゲームで あそぶ</button>
@@ -279,7 +312,7 @@ body{
 </div>
 </div>
 </div>
-<div class="version-badge">v_index_safe_2026-01-18a</div>
+
 <script>
 (function(){
   function setVh(){
@@ -352,6 +385,7 @@ body{
 
 })();
 </script>
-<div class="verBadge">v_release_20260118_index</div>
+
+<div class="verBadge">kids_ui_v3</div>
 </body>
 </html>

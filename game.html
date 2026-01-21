@@ -9,7 +9,7 @@
 <title>ウクレレ・ゲーム</title>
 <style>/* iphone-viewport-fix */
 
-    :root{
+    :root{ --vvh: 1vh; --vvTop: 0px; 
       --vh: 1vh;
 
       --primary: #ff7a3d;
@@ -29,7 +29,7 @@
       user-select: none;
       -webkit-user-select: none;
     }
-    #app { position: fixed; inset: 0; width: 100%; height: 100dvh; height: calc(var(--vh) * 100); overflow: hidden; padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
+    #app { position: fixed; inset: 0; width: 100%; height: calc(var(--vvh, 1vh) * 100); height: calc(var(--vh) * 100); overflow: hidden; padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
     canvas { display:block; width:100%; height:100%; touch-action:none; }
 
     /* メニューオーバーレイ */
@@ -55,7 +55,7 @@
       transition: transform 0.08s; text-align: left;
     }
     .menu-btn:active { transform: translateY(2px); box-shadow: none; }
-    .badge { flex: 0 0 38px; height: 38px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
+    .badge { flex: 0 0 38px; height: 38px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color:#1b1b1b; }
     .menu-btn.mode2 .badge{ background: #ffde59; color:#4a3728; }
     .menu-btn.mode3 .badge{ background: #7ed957; }
     .menu-btn.mode4 .badge{ background: #5ce1e6; color: #133; }
@@ -122,7 +122,7 @@
       width: 100%; border: none; border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 900;
       cursor: pointer; margin-top: 10px;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary { background: var(--primary); color: #1b1b1b; }
     .btn-secondary { background: #eee; color: #555; }
 
     @media (orientation: landscape) and (max-height: 460px) {
@@ -241,7 +241,7 @@
     /* comboBig disabled (show combo only in FX) */
     #comboBig{ display:none !important; }
   
-  .verBadge{position:fixed;right:10px;bottom:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:4px 8px;border-radius:10px;z-index:9999;pointer-events:none;}
+  .verBadge{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);right:auto;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;pointer-events:none;}
 
 
 /* === KIDS UI THEME (SAFE: style/text only) ========================= */
@@ -323,35 +323,61 @@ body::before{
   font-weight: 900 !important;
 }
 
-
-
-
-/* === kids_ui_v2 iPhone fixes (CSS only / safe) === */
-
-/* メニューの文字（ド/レなど）が上で切れないように */
-.menu-text .title,
-.menu-card h1,
-.menu-card h2{
-  line-height: 1.22;
-  padding-top: 2px;
+/* === KIDS_UI_OVERRIDES === */
+:root{
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
-
-/* iPhone横の高さが低い時、メニュー内の余白を詰めて切れ防止 */
-@media (max-height: 420px){
-  .menu-card{ padding: 16px 16px; }
-  .menu-card h1{ font-size: 24px; }
-  .menu-card p{ margin: 8px 0 10px; }
-  .menu-btn{ padding: 12px 14px; }
+/* Use real viewport height on iOS */
+html, body{
+  height: calc(var(--vvh, var(--vh, 1vh)) * 100);
 }
-
-/* 版表示がストップ付近に被らないように（左下へ寄せて余白確保） */
-.version-badge{
-  left: 10px !important;
+/* version badge: never overlap buttons */
+.verBadge{
+  left: calc(var(--safe-left) + 12px) !important;
   right: auto !important;
-  bottom: calc(env(safe-area-inset-bottom) + 10px) !important;
-  max-width: 55vw;
+  bottom: calc(var(--safe-bottom) + 10px) !important;
+  z-index: 9999 !important;
+  pointer-events: none;
 }
 
+/* Menu title text (ドレミ/コード) : prevent top clipping */
+.menu-text .title{
+  line-height: 1.25 !important;
+  padding-top: 2px !important;
+}
+.menu-text small{ line-height: 1.2 !important; }
+.menu-btn{ overflow: visible !important; }
+/* Emoji badges: avoid 'white on white' on iOS text emoji */
+.badge{
+  color: #1b1b1b !important;
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif;
+}
+/* HUD chord name: keep visible under Safari bars */
+#chordHud{
+  top: calc(var(--safe-top) + 10px) !important;
+}
+/* Stop button: keep within safe area */
+#stopBtn, .stopBtn, #btnStop{
+  right: calc(var(--safe-right) + 14px) !important;
+  bottom: calc(var(--safe-bottom) + 14px) !important;
+}
+/* Emoji font fallback (iOS/Android) */
+.badge, .kids-mascot, .emoji{
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif !important;
+  font-variant-emoji: emoji;
+}
+/* Disable bubble circles (look like white rings on iPhone) */
+body::before{ display:none !important; background:none !important; }
+/* Menu title: avoid iOS top-clipping */
+.menu-text{ padding-top: 2px; }
+.menu-text .title{ line-height: 1.28 !important; padding-top: 4px !important; }
+@media (max-height: 430px){
+  .menu-btn{ padding-top: 14px; padding-bottom: 14px; }
+  .menu-text .title{ padding-top: 5px !important; }
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
 <body>
@@ -523,9 +549,24 @@ let speedLevel = 0;
   updateComboUI();
   const big=document.getElementById('comboBig'); if(big) big.style.display='none';
 let currentScrollSpeed = 3.5;
-const SPEED_UP_EVERY = 5;    // 5連続で加速
-const SPEED_STEP = 0.375;   // 1段階の加速量（×1.5）
-const SPEED_MAX_ADD = 2.25; // 上限（×1.5）
+const SPEED_UP_EVERY = 5;    
+const SPEED_STEP = 0.75; // +0.75 per 5 HIT (was ~0.5)
+// 5連続で加速
+
+function _resetSpe_resetSpe_resetSpeedState(){
+  // UI/flow only: ensure speed/combos don't carry across modes
+  try{
+    speedLevel = 0;
+    currentScrollSpeed = baseScrollSpeed;
+    scrollSpeed = baseScrollSpeed;
+    combo = 0;
+    maxCombo = 0;
+    // clear lingering messages
+    showMsg('');
+  }catch(e){}
+}
+
+const SPEED_MAX_ADD = 1.75; // cap: base 3.5 -> 5.25 (x1.5)
 
 let _fxTimer = 0;
 const CHEER_PHRASES = ['その調子！','いいぞ！','ノってる！','キター！','最高！','つづけ！','いける！'];
@@ -556,7 +597,7 @@ function showFx(text, kind, opts = {}){
   }, opts.durationMs || 980);
 }
 
-function resetSpeedState(){
+function resetSpe_resetSpe_resetSpeedState(){
   comboStreak = 0;
   speedLevel = 0;
   currentScrollSpeed = baseScrollSpeed;
@@ -652,7 +693,7 @@ function goMenu(){
   
   // キャンバスクリア
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  resetSpeedState();
+  resetSpe_resetSpe_resetSpeedState();
   const fx=document.getElementById('fxMsg'); if(fx){ fx.style.display='none'; fx.className=''; }
 }
 
@@ -669,8 +710,9 @@ function resumeGame(){
 }
 
 // --- ゲーム開始フロー ---
-async function prepGame(type){
-  // タップモードならマイク不要
+async function prepGame
+  _resetSpe_resetSpe_resetSpeedState();
+// タップモードならマイク不要
   if(playMode === 'TAP'){ startGameByType(type); return; }
 
   // マイク準備
@@ -713,7 +755,9 @@ async function prepGame(type){
 }
 
 function startGameByType(type){
-  lastStartParams = type;
+  
+  _resetSpe_resetSpeedState();
+lastStartParams = type;
   if(type==='scale') initGame('scale', null, {speedBase:3.4});
   else if(type==='easy') initGame('practice', ['C','F','G7','Am'], {speedBase:3.2});
   else if(type==='hard') initGame('practice', ['C','F','G7','Am','G','A7','Dm','Em','D7'], {speedBase:3.35});
@@ -741,12 +785,9 @@ function initGame(mode, levelData, opts){
   score=0; groups=[]; stars=[];
   waitHold=false; waitTargetGroup=null;
   baseScrollSpeed = opts.speedBase || 3.5;
-    // kids_ui_v2: メニューから別ゲームへ切替しても速度が持ち越されないように初期化
-  comboStreak = 0;
-  speedLevel = 0;
-currentScrollSpeed = baseScrollSpeed;
+  currentScrollSpeed = baseScrollSpeed;
   scrollSpeed = currentScrollSpeed;
-  resetSpeedState();
+  resetSpe_resetSpe_resetSpeedState();
   gameMode = mode;
   isSongMode = (mode==='song');
   currentLevelChords = levelData || [];
@@ -1054,8 +1095,9 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 })();
 </script>
 <div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
-game_kids_ui_v2
+game_iphone_fix_v11
 </div>
-<div class="verBadge">v_release_20260118_game</div>
+
+<div class="verBadge">kids_ui_v3</div>
 </body>
 </html>
