@@ -192,6 +192,37 @@ body { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%) !important;
 }
 
 
+
+
+/* === kids_ui_v2 iPhone fixes (CSS only / safe) === */
+
+html, body { height: 100%; }
+body{
+  min-height: calc(var(--vh, 1vh) * 100);
+  padding-top: calc(env(safe-area-inset-top) + 10px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+  overflow-x: hidden;
+}
+
+/* 🐼が切れない＆不自然に見えないように（小さめ・中央寄せ・余白確保） */
+.kids-mascot{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: clamp(44px, 9vw, 62px);
+  padding: 8px 14px;
+  margin: 6px auto 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.55);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  max-width: 92vw;
+}
+
+@media (max-height: 420px){
+  .kids-mascot{ margin: 2px auto 6px; font-size: clamp(40px, 8vw, 56px); padding: 6px 12px; }
+}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
 <body><div aria-hidden="true" class="kids-mascot">🐼</div>

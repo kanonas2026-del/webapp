@@ -324,6 +324,34 @@ body::before{
 }
 
 
+
+
+/* === kids_ui_v2 iPhone fixes (CSS only / safe) === */
+
+/* メニューの文字（ド/レなど）が上で切れないように */
+.menu-text .title,
+.menu-card h1,
+.menu-card h2{
+  line-height: 1.22;
+  padding-top: 2px;
+}
+
+/* iPhone横の高さが低い時、メニュー内の余白を詰めて切れ防止 */
+@media (max-height: 420px){
+  .menu-card{ padding: 16px 16px; }
+  .menu-card h1{ font-size: 24px; }
+  .menu-card p{ margin: 8px 0 10px; }
+  .menu-btn{ padding: 12px 14px; }
+}
+
+/* 版表示がストップ付近に被らないように（左下へ寄せて余白確保） */
+.version-badge{
+  left: 10px !important;
+  right: auto !important;
+  bottom: calc(env(safe-area-inset-bottom) + 10px) !important;
+  max-width: 55vw;
+}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
 <body>
@@ -713,7 +741,10 @@ function initGame(mode, levelData, opts){
   score=0; groups=[]; stars=[];
   waitHold=false; waitTargetGroup=null;
   baseScrollSpeed = opts.speedBase || 3.5;
-  currentScrollSpeed = baseScrollSpeed;
+    // kids_ui_v2: メニューから別ゲームへ切替しても速度が持ち越されないように初期化
+  comboStreak = 0;
+  speedLevel = 0;
+currentScrollSpeed = baseScrollSpeed;
   scrollSpeed = currentScrollSpeed;
   resetSpeedState();
   gameMode = mode;
@@ -1023,7 +1054,7 @@ function nudge(){ try{ window.scrollTo(0, 1); }catch(e){} setTimeout(function(){
 })();
 </script>
 <div style="position:fixed;left:10px;bottom:10px;z-index:9999;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,0.92);color:#111;font-size:12px;font-weight:900;">
-game_iphone_fix_v11
+game_kids_ui_v2
 </div>
 <div class="verBadge">v_release_20260118_game</div>
 </body>

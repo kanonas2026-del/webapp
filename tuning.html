@@ -317,6 +317,45 @@ body::before{
 }
 
 
+
+
+/* === kids_ui_v2 iPhone fixes (CSS only / safe) === */
+
+html, body { height: 100%; }
+body{
+  min-height: calc(var(--vh, 1vh) * 100);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden;
+}
+
+/* 左の丸が楕円にならないように */
+.string-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  aspect-ratio: 1 / 1;
+}
+
+/* はじめるボタンの文字が下で切れない */
+.start-overlay{ padding-bottom: calc(env(safe-area-inset-bottom) + 14px) !important; }
+.start-btn{
+  line-height: 1.25;
+  white-space: normal;
+  padding: 14px 18px;
+  box-sizing: border-box;
+}
+
+/* 高さが低い端末（iPhone横など）で全体が下で切れないよう微調整 */
+@media (max-height: 420px){
+  #guide-msg{ font-size: clamp(16px, 4.5vw, 22px) !important; padding: 8px 12px !important; }
+  #tuner-nav{ top: 8% !important; }
+  .start-btn{ font-size: clamp(16px, 4.0vw, 20px) !important; padding: 12px 16px !important; }
+  .splash-pop{ font-size: clamp(18px, 4.5vw, 26px) !important; }
+  .splash-btn{ font-size: clamp(16px, 4.0vw, 20px) !important; padding: 12px 14px !important; }
+}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&amp;display=swap" rel="stylesheet"/></head>
 <body>
@@ -324,7 +363,7 @@ body::before{
 <button class="start-btn" onclick="startEverything()">🎵 おとの じゅんびをはじめましょう！</button>
 </div>
 <div class="nav-back"><a href="index.html">🏝️ さいしょに もどる</a></div>
-<div class="version-badge">v_tuning_safe_2026-01-18a</div>
+<div class="version-badge">v_tuning_kids_ui_v2</div>
 <section id="screen-tuning">
 <div aria-hidden="true" class="kids-mini">🐼</div><div id="guide-msg">1げんを ひいてみよう</div>
 <div id="tuner-nav">
@@ -365,6 +404,17 @@ body::before{
 </div>
 </section>
 <script>
+/* kids_ui_v2: iOS Safariの 100vh 問題対策（下が切れる/バーで変動） */
+(function(){
+  function setVh(){
+    const h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    document.documentElement.style.setProperty('--vh', (h*0.01) + 'px');
+  }
+  setVh();
+  window.addEventListener('resize', setVh);
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', setVh);
+})();
+
 const canvas = document.getElementById('tuningCanvas');
 const ctx = canvas.getContext('2d');
 const FREQS = [440.00, 329.63, 261.63, 392.00]; 
